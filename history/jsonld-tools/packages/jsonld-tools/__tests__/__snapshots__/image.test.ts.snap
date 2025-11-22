@@ -1,0 +1,122 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`image:cosmjs-roadmap-announcement 1`] = `
+[
+  {
+    "@id": "image:cosmjs-roadmap-announcement",
+    "@type": "ImageObject",
+    "about": {
+      "@id": "event:cosmjs-roadmap",
+    },
+    "contentUrl": "https://example.com/cosmjs-roadmap.jpg",
+    "creator": {
+      "@id": "person:danlynch",
+    },
+    "description": "Image announcing the CosmJS roadmap event",
+    "name": "CosmJS Roadmap Announcement",
+  },
+  {
+    "@id": "event:cosmjs-roadmap",
+    "@type": "Event",
+    "description": "CosmJS development roadmap presentation",
+    "location": "Virtual",
+    "name": "CosmJS Roadmap Event",
+    "organizer": {
+      "@id": "org:hyperweb",
+    },
+    "performer": [
+      "person:danlynch",
+    ],
+    "startDate": "2024-01-15",
+  },
+  {
+    "@id": "person:danlynch",
+    "@type": "Person",
+    "affiliation": {
+      "@id": "org:hyperweb",
+    },
+    "email": "dan@hyperweb.com",
+    "jobTitle": "Founder & CEO",
+    "knows": [
+      "person:jane",
+      "person:john",
+    ],
+    "name": "Dan Lynch",
+    "worksFor": "org:hyperweb",
+  },
+  {
+    "@id": "org:hyperweb",
+    "@type": "Organization",
+    "foundingDate": "2020-01-01",
+    "location": {
+      "@id": "place:san-francisco",
+    },
+    "member": [
+      {
+        "@id": "person:danlynch",
+      },
+      {
+        "@id": "person:john",
+      },
+    ],
+    "name": "HyperWeb",
+    "url": "https://hyperweb.com",
+  },
+  {
+    "@id": "person:jane",
+    "@type": "Person",
+    "email": "jane@example.com",
+    "jobTitle": "Developer",
+    "knows": {
+      "@id": "person:danlynch",
+    },
+    "name": "Jane Doe",
+  },
+  {
+    "@id": "person:john",
+    "@type": [
+      "Person",
+      "Developer",
+    ],
+    "email": "john@example.com",
+    "jobTitle": "Senior Developer",
+    "memberOf": [
+      {
+        "@id": "org:hyperweb",
+      },
+      {
+        "@id": "org:osmosis",
+      },
+    ],
+    "name": "John Smith",
+  },
+  {
+    "@id": "place:san-francisco",
+    "@type": "Place",
+    "address": {
+      "@type": "PostalAddress",
+      "addressCountry": "US",
+      "addressLocality": "San Francisco",
+      "addressRegion": "CA",
+    },
+    "geo": {
+      "@type": "GeoCoordinates",
+      "latitude": 37.7749,
+      "longitude": -122.4194,
+    },
+    "name": "San Francisco",
+  },
+  {
+    "@id": "org:osmosis",
+    "@type": "Organization",
+    "foundingDate": "2021-06-01",
+    "member": [
+      {
+        "@id": "person:john",
+      },
+    ],
+    "name": "Osmosis",
+    "url": "https://osmosis.zone",
+  },
+]
+`;

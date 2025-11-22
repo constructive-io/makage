@@ -1,0 +1,84 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`event:osmocon-2023-paris expanded with inlined references 1`] = `
+{
+  "@id": "event:osmocon-2023-paris",
+  "@type": "Event",
+  "description": "Annual Osmosis conference in Paris",
+  "endDate": "2023-10-17",
+  "location": "Paris, France",
+  "name": "Osmocon 2023 Paris",
+  "organizer": {
+    "@id": "org:osmosis",
+    "@type": "Organization",
+    "foundingDate": "2021-06-01",
+    "member": [
+      {
+        "@id": "person:john",
+        "@type": [
+          "Person",
+          "Developer",
+        ],
+        "email": "john@example.com",
+        "jobTitle": "Senior Developer",
+        "memberOf": [
+          {
+            "@id": "org:hyperweb",
+            "@type": "Organization",
+            "foundingDate": "2020-01-01",
+            "location": {
+              "@id": "place:san-francisco",
+              "@type": "Place",
+              "address": {
+                "@type": "PostalAddress",
+                "addressCountry": "US",
+                "addressLocality": "San Francisco",
+                "addressRegion": "CA",
+              },
+              "geo": {
+                "@type": "GeoCoordinates",
+                "latitude": 37.7749,
+                "longitude": -122.4194,
+              },
+              "name": "San Francisco",
+            },
+            "member": [
+              {
+                "@id": "person:danlynch",
+                "@type": "Person",
+                "affiliation": {
+                  "@id": "org:hyperweb",
+                },
+                "email": "dan@hyperweb.com",
+                "jobTitle": "Founder & CEO",
+                "knows": [
+                  "person:jane",
+                  "person:john",
+                ],
+                "name": "Dan Lynch",
+                "worksFor": "org:hyperweb",
+              },
+              {
+                "@id": "person:john",
+              },
+            ],
+            "name": "HyperWeb",
+            "url": "https://hyperweb.com",
+          },
+          {
+            "@id": "org:osmosis",
+          },
+        ],
+        "name": "John Smith",
+      },
+    ],
+    "name": "Osmosis",
+    "url": "https://osmosis.zone",
+  },
+  "performer": [
+    "person:danlynch",
+    "person:jane",
+  ],
+  "startDate": "2023-10-15",
+}
+`;

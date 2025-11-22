@@ -1,0 +1,50 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`Graph Validation Methods findMissingReferences should find missing references in enriched graph 1`] = `[]`;
+
+exports[`Graph Validation Methods findNestedEntities should find nested entities in enriched graph 1`] = `
+[
+  {
+    "hasId": false,
+    "nestedEntity": {
+      "@type": "PostalAddress",
+      "addressCountry": "US",
+      "addressLocality": "San Francisco",
+      "addressRegion": "CA",
+    },
+    "parentId": "place:san-francisco",
+    "property": "address",
+  },
+  {
+    "hasId": false,
+    "nestedEntity": {
+      "@type": "GeoCoordinates",
+      "latitude": 37.7749,
+      "longitude": -122.4194,
+    },
+    "parentId": "place:san-francisco",
+    "property": "geo",
+  },
+  {
+    "hasId": false,
+    "nestedEntity": {
+      "@type": "Rating",
+      "bestRating": 5,
+      "ratingValue": 5,
+    },
+    "parentId": "review:cosmos-sdk-review",
+    "property": "reviewRating",
+  },
+]
+`;
+
+exports[`Graph Validation Methods findOrphans should find orphaned entities in enriched graph 1`] = `
+[
+  "article:web3-future",
+  "course:blockchain-101",
+  "event:osmocon-2023-paris",
+  "image:cosmjs-roadmap-announcement",
+  "project:interchain-ui",
+  "review:cosmos-sdk-review",
+]
+`;

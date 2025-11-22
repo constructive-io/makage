@@ -1,0 +1,34 @@
+{
+  "name": "jsonldjs",
+  "version": "0.1.2",
+  "description": "JSON-LD Tooling",
+  "author": "Dan Lynch <pyramation@gmail.com>",
+  "homepage": "https://github.com/hyperweb-io/jsonldjs",
+  "license": "SEE LICENSE IN LICENSE",
+  "main": "index.js",
+  "module": "esm/index.js",
+  "types": "index.d.ts",
+  "publishConfig": {
+    "access": "public",
+    "directory": "dist"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/hyperweb-io/jsonld-tools"
+  },
+  "keywords": [
+    "jsonld-tools"
+  ],
+  "scripts": {
+    "copy": "copyfiles -f ../../LICENSE README.md package.json dist",
+    "clean": "rimraf dist",
+    "build": "pnpm run clean && tsc && tsc -p tsconfig.esm.json && pnpm run copy",
+    "build:dev": "pnpm run clean && tsc --declarationMap && tsc -p tsconfig.esm.json && pnpm run copy",
+    "test": "jest",
+    "test:watch": "jest --watch",
+    "test:debug": "node --inspect node_modules/.bin/jest --runInBand"
+  },
+  "bugs": {
+    "url": "https://github.com/hyperweb-io/jsonld-tools/issues"
+  }
+}

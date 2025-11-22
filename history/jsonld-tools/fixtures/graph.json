@@ -1,0 +1,167 @@
+[
+  {
+    "@id": "person:danlynch",
+    "@type": "Person",
+    "name": "Dan Lynch",
+    "affiliation": { "@id": "org:hyperweb" },
+    "knows": ["person:jane", "person:john"],
+    "worksFor": "org:hyperweb",
+    "email": "dan@hyperweb.com",
+    "jobTitle": "Founder & CEO"
+  },
+  {
+    "@id": "person:jane",
+    "@type": "Person",
+    "name": "Jane Doe",
+    "knows": { "@id": "person:danlynch" },
+    "email": "jane@example.com",
+    "jobTitle": "Developer"
+  },
+  {
+    "@id": "person:john",
+    "@type": ["Person", "Developer"],
+    "name": "John Smith",
+    "memberOf": [
+      { "@id": "org:hyperweb" },
+      { "@id": "org:osmosis" }
+    ],
+    "email": "john@example.com",
+    "jobTitle": "Senior Developer"
+  },
+  {
+    "@id": "org:hyperweb",
+    "@type": "Organization",
+    "name": "HyperWeb",
+    "url": "https://hyperweb.com",
+    "member": [
+      { "@id": "person:danlynch" },
+      { "@id": "person:john" }
+    ],
+    "foundingDate": "2020-01-01",
+    "location": { "@id": "place:san-francisco" }
+  },
+  {
+    "@id": "org:osmosis",
+    "@type": "Organization",
+    "name": "Osmosis",
+    "url": "https://osmosis.zone",
+    "member": [
+      { "@id": "person:john" }
+    ],
+    "foundingDate": "2021-06-01"
+  },
+  {
+    "@id": "event:osmocon-2023-paris",
+    "@type": "Event",
+    "name": "Osmocon 2023 Paris",
+    "organizer": { "@id": "org:osmosis" },
+    "performer": ["person:danlynch", "person:jane"],
+    "location": "Paris, France",
+    "startDate": "2023-10-15",
+    "endDate": "2023-10-17",
+    "description": "Annual Osmosis conference in Paris"
+  },
+  {
+    "@id": "event:cosmjs-roadmap",
+    "@type": "Event",
+    "name": "CosmJS Roadmap Event",
+    "organizer": { "@id": "org:hyperweb" },
+    "performer": ["person:danlynch"],
+    "location": "Virtual",
+    "startDate": "2024-01-15",
+    "description": "CosmJS development roadmap presentation"
+  },
+  {
+    "@id": "event:cosmoverse-2024",
+    "@type": "Event",
+    "name": "Cosmoverse 2024",
+    "organizer": { "@id": "org:osmosis" },
+    "performer": ["person:danlynch", "person:jane"],
+    "location": "Dubai, UAE",
+    "startDate": "2024-09-15",
+    "endDate": "2024-09-17",
+    "description": "Major Cosmos ecosystem conference"
+  },
+  {
+    "@id": "article:web3-future",
+    "@type": "Article",
+    "headline": "The Future of Web3",
+    "author": { "@id": "person:danlynch" },
+    "mentions": [
+      { "@id": "org:hyperweb" },
+      { "@id": "event:cosmoverse-2024" }
+    ],
+    "datePublished": "2024-01-01",
+    "description": "An article about the future of Web3 technology"
+  },
+  {
+    "@id": "image:cosmjs-roadmap-announcement",
+    "@type": "ImageObject",
+    "name": "CosmJS Roadmap Announcement",
+    "contentUrl": "https://example.com/cosmjs-roadmap.jpg",
+    "description": "Image announcing the CosmJS roadmap event",
+    "about": { "@id": "event:cosmjs-roadmap" },
+    "creator": { "@id": "person:danlynch" }
+  },
+  {
+    "@id": "place:san-francisco",
+    "@type": "Place",
+    "name": "San Francisco",
+    "address": {
+      "@type": "PostalAddress",
+      "addressLocality": "San Francisco",
+      "addressRegion": "CA",
+      "addressCountry": "US"
+    },
+    "geo": {
+      "@type": "GeoCoordinates",
+      "latitude": 37.7749,
+      "longitude": -122.4194
+    }
+  },
+  {
+    "@id": "product:cosmos-sdk",
+    "@type": "SoftwareApplication",
+    "name": "Cosmos SDK",
+    "description": "Framework for building blockchain applications",
+    "applicationCategory": "Blockchain Framework",
+    "operatingSystem": "Cross-platform",
+    "programmingLanguage": "Go",
+    "maintainer": { "@id": "org:osmosis" }
+  },
+  {
+    "@id": "course:blockchain-101",
+    "@type": "Course",
+    "name": "Blockchain 101",
+    "description": "Introduction to blockchain technology",
+    "provider": { "@id": "org:hyperweb" },
+    "instructor": { "@id": "person:danlynch" },
+    "coursePrerequisites": "Basic programming knowledge",
+    "timeRequired": "P4W"
+  },
+  {
+    "@id": "review:cosmos-sdk-review",
+    "@type": "Review",
+    "reviewBody": "Excellent framework for blockchain development",
+    "reviewRating": {
+      "@type": "Rating",
+      "ratingValue": 5,
+      "bestRating": 5
+    },
+    "author": { "@id": "person:jane" },
+    "itemReviewed": { "@id": "product:cosmos-sdk" }
+  },
+  {
+    "@id": "project:interchain-ui",
+    "@type": "CreativeWork",
+    "name": "Interchain UI",
+    "description": "UI components for Cosmos ecosystem",
+    "creator": { "@id": "org:hyperweb" },
+    "contributor": [
+      { "@id": "person:danlynch" },
+      { "@id": "person:john" }
+    ],
+    "license": "MIT",
+    "programmingLanguage": "TypeScript"
+  }
+]
