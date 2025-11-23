@@ -11,8 +11,8 @@
   "registry": "https://registry.npmjs.org",
   "command": {
     "create": {
-      "homepage": "https://github.com/undefined/undefined",
-      "license": "SEE LICENSE IN LICENSE",
+      "homepage": "https://github.com/hyperweb-io/dev-utils",
+      "license": "MIT",
       "access": "restricted"
     },
     "publish": {
