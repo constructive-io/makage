@@ -15,6 +15,7 @@ export interface SchemaTSOptions {
   useSingleQuotes: boolean;
   camelCase?: boolean; // defaults to false
   camelCaseFn?: (str: string) => string; // optional function to convert keys to camelCase
+  stripLeadingNonAlphabetChars?: boolean; // defaults to true, strips leading non-alphabet chars when camelCasing
   strictTypeSafety: boolean; // true uses { [k: string]: unknown; }, false uses any
   overrides?: SchemaDefinitionOverrides;
 
@@ -72,6 +73,7 @@ export const defaultSchemaTSOptions: SchemaTSOptions = {
   useSingleQuotes: true,
   camelCase: false,
   camelCaseFn: null,
+  stripLeadingNonAlphabetChars: false,
   strictTypeSafety: true,
   exclude: [],
   include: [],

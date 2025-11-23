@@ -233,7 +233,7 @@ function createPropertySignature(
   required: string[],
   schema: JSONSchema
 ): t.TSPropertySignature {
-  let camelCaseFn: (str: string) => string = toCamelCase;
+  let camelCaseFn: (str: string) => string = (str: string) => toCamelCase(str, ctx.options.stripLeadingNonAlphabetChars);
   if (ctx.options.camelCaseFn) camelCaseFn = ctx.options.camelCaseFn;
   const name = ctx.options.camelCase ? camelCaseFn(key) : key;
   const propType = getTypeForProp(ctx, prop, required, schema);
