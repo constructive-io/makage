@@ -30,12 +30,3 @@ const packageJson = findPackageJson();
 console.log('Package name:', packageJson.name);
 console.log('Version:', packageJson.version);
 ```
-
-## Developing
-
-When first cloning the repo:
-
-```
-yarn
-yarn build
-```

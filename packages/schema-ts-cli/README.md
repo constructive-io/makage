@@ -17,19 +17,3 @@
 ```sh
 npm install @schema-typescript/cli
 ```
-## Table of contents
-
-- [@schema-typescript/cli](#@schema-typescript/cli)
-  - [Install](#install)
-  - [Table of contents](#table-of-contents)
-- [Developing](#developing)
-- [Credits](#credits)
-
-## Developing
-
-When first cloning the repo:
-
-```
-yarn
-yarn build
-```

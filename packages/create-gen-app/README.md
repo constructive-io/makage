@@ -146,7 +146,3 @@ Examples of valid variables:
 - `__CamelCase__`
 - `__snake_case__`
 - `__VERSION_1__`
-
-## License
-
-MIT

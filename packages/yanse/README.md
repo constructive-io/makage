@@ -241,21 +241,6 @@ console.log(customYanse.red('Not colored'));
 - **TypeScript First** - Written in TypeScript with full type support
 - **Familiar API** - Drop-in replacement for chalk
 
-## Developing
-
-When first cloning the repo:
-
-```sh
-pnpm install
-pnpm build
-```
-
-## Testing
-
-```sh
-pnpm test
-```
-
 ## Credits
 
 Inspired by [chalk](https://github.com/chalk/chalk) and [ansi-colors](https://github.com/doowb/ansi-colors).
