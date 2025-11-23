@@ -66,8 +66,8 @@ importers:
   packages/fetch-api-client:
     dependencies:
       '@interweb/http-errors':
-        specifier: ^0.1.1
-        version: 0.1.1
+        specifier: workspace:*
+        version: link:../http-errors/dist
       isomorphic-fetch:
         specifier: ^3.0.0
         version: 3.0.0(encoding@0.1.13)
@@ -129,8 +129,8 @@ importers:
   packages/node-api-client:
     dependencies:
       '@interweb/http-errors':
-        specifier: ^0.1.1
-        version: 0.1.1
+        specifier: workspace:*
+        version: link:../http-errors/dist
     publishDirectory: dist
 
   packages/schema-sdk:
@@ -147,12 +147,12 @@ importers:
       '@babel/types':
         specifier: 7.28.5
         version: 7.28.5
-      '@interweb-utils/casing':
-        specifier: ^0.3.0
-        version: 0.3.0
+      '@interweb/casing':
+        specifier: workspace:*
+        version: link:../casing/dist
       '@interweb/fetch-api-client':
-        specifier: ^0.6.1
-        version: 0.6.1(encoding@0.1.13)
+        specifier: workspace:*
+        version: link:../fetch-api-client/dist
       deepmerge:
         specifier: ^4.3.1
         version: 4.3.1
@@ -160,8 +160,8 @@ importers:
         specifier: ^3.1.1
         version: 3.1.1
       schema-typescript:
-        specifier: ^0.12.1
-        version: 0.12.1
+        specifier: workspace:*
+        version: link:../schema-typescript/dist
     devDependencies:
       '@types/babel__generator':
         specifier: ^7.27.0
@@ -179,9 +179,9 @@ importers:
       '@babel/types':
         specifier: ^7.28.5
         version: 7.28.5
-      '@interweb-utils/casing':
-        specifier: ^0.3.0
-        version: 0.3.0
+      '@interweb/casing':
+        specifier: workspace:*
+        version: link:../casing/dist
       deepmerge:
         specifier: ^4.3.1
         version: 4.3.1
@@ -222,8 +222,8 @@ importers:
         specifier: 1.0.2
         version: 1.0.2
       nested-obj:
-        specifier: ^0.0.1
-        version: 0.0.1
+        specifier: workspace:*
+        version: link:../nested-obj/dist
       prettier:
         specifier: ^2.8.7
         version: 2.8.8
@@ -504,18 +504,6 @@ packages:
     peerDependenciesMeta:
       '@types/node':
         optional: true
-
-  '@interweb-utils/casing@0.2.0':
-    resolution: {integrity: sha512-ORQySrHzMYmtVRkYvtE1HGa8QnoqYPhu5UWQyv9302D/ZZe0Ae6cpk4NH1xEXgHeFq/CraiOcnLhmc3h7wdNHg==}
-
-  '@interweb-utils/casing@0.3.0':
-    resolution: {integrity: sha512-VBLPw0rxLFoQo+Xhp9wfu3MlKR5QAwJNjxW858JGlq69hpqVOg4cJA5XD/D2FnJB+MiSHIpDck+UZ/5HRkn6UQ==}
-
-  '@interweb/fetch-api-client@0.6.1':
-    resolution: {integrity: sha512-+QfJrK8c+uGhnIkGaoLeyuL7NuLbNgH8AeZwVkGqtOr9/hkrYMJQN+Jnw06TJeeuM12R8QZgM/0M8bpdG8KnlQ==}
-
-  '@interweb/http-errors@0.1.1':
-    resolution: {integrity: sha512-JEwL0a8ixMT1WQwx4YNEHLiFrB/7QKxMU2j/HxycdS1BIfZxWVLggdmONHENdmsVPOuaxUJduGmhzFVidOL0IA==}
 
   '@isaacs/cliui@8.0.2':
     resolution: {integrity: sha512-O8jcjabXaleOG9DQ0+ARXWZBTfnP4WNAqzuiJK7ll44AmxGKv/J2M4TPjxjY3znBCfvBXFzucm1twdyFybFqEA==}
@@ -3002,9 +2990,6 @@ packages:
   neo-async@2.6.2:
     resolution: {integrity: sha512-Yd3UES5mWCSqR+qNT93S3UoYUkqAZ9lLg8a7g9rimsWmYGK8cVToA4/sF3RrshdyV3sAGMXVUmpMYOw+dLpOuw==}
 
-  nested-obj@0.0.1:
-    resolution: {integrity: sha512-kB1WKTng+IePQhZVs1UXtFaHBx4QEM5a0XKGAzYfCKvdx5DhNjCytNDWMUGpNNpHLotln+tiwcA52kWCIgGq1Q==}
-
   node-fetch@2.6.7:
     resolution: {integrity: sha512-ZjMPFEfVx5j+y2yF35Kzx5sF7kDzxuDj6ziH4FFbOp87zKDZNx8yExJIb05OGF4Nlt9IHFIMBkRl41VdvcNdbQ==}
     engines: {node: 4.x || >=6.0.0}
@@ -3493,9 +3478,6 @@ packages:
 
   safer-buffer@2.1.2:
     resolution: {integrity: sha512-YZo3K82SD7Riyi0E1EQPojLz7kpepnSQI9IyPbHHg1XXXevb5dJI7tpyN2ADxGcQbHG7vcyRHk0cbwqcQriUtg==}
-
-  schema-typescript@0.12.1:
-    resolution: {integrity: sha512-dgfQrLjqsXEAC7vZ3fJDBsIPpUDJ2SrzuQFvXslrEjVjOSQyVykBua2tNmM4uFn4uIL7K3Ux64pXbaUnngkhhw==}
 
   semver@5.7.2:
     resolution: {integrity: sha512-cBznnQ9KjJqU67B52RMC65CMarK2600WFnbkcaiwWq3xy/5haFJlshgnpjovMVJ+Hff49d8GEn0b87C5pDQ10g==}
@@ -4301,19 +4283,6 @@ snapshots:
       iconv-lite: 0.7.0
     optionalDependencies:
       '@types/node': 22.19.1
-
-  '@interweb-utils/casing@0.2.0': {}
-
-  '@interweb-utils/casing@0.3.0': {}
-
-  '@interweb/fetch-api-client@0.6.1(encoding@0.1.13)':
-    dependencies:
-      '@interweb/http-errors': 0.1.1
-      isomorphic-fetch: 3.0.0(encoding@0.1.13)
-    transitivePeerDependencies:
-      - encoding
-
-  '@interweb/http-errors@0.1.1': {}
 
   '@isaacs/cliui@8.0.2':
     dependencies:
@@ -7687,8 +7656,6 @@ snapshots:
 
   neo-async@2.6.2: {}
 
-  nested-obj@0.0.1: {}
-
   node-fetch@2.6.7(encoding@0.1.13):
     dependencies:
       whatwg-url: 5.0.0
@@ -8223,14 +8190,6 @@ snapshots:
   safe-buffer@5.2.1: {}
 
   safer-buffer@2.1.2: {}
-
-  schema-typescript@0.12.1:
-    dependencies:
-      '@babel/generator': 7.28.5
-      '@babel/types': 7.28.5
-      '@interweb-utils/casing': 0.2.0
-      deepmerge: 4.3.1
-      minimatch: 9.0.5
 
   semver@5.7.2: {}
 

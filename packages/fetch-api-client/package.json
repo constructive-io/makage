@@ -30,7 +30,7 @@
   },
   "keywords": [],
   "dependencies": {
-    "@interweb/http-errors": "^0.1.1",
+    "@interweb/http-errors": "workspace:*",
     "isomorphic-fetch": "^3.0.0"
   },
   "devDependencies": {

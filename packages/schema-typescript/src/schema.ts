@@ -4,7 +4,7 @@ import {
   isValidIdentifier,
   isValidIdentifierCamelized,
   toCamelCase,
-} from '@interweb-utils/casing';
+} from '@interweb/casing';
 
 import { SchemaTSContext, type SchemaTSOptions } from './context';
 import type { JSONSchema } from './types';

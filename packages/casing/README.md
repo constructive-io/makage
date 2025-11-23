@@ -1,4 +1,4 @@
-# @interweb-utils/casing
+# @interweb/casing
 
 <p align="center">
   <img src="https://github.com/cosmology-tech/interweb-utils/assets/545047/89c743c4-be88-409f-9a77-4b02cd7fe9a4" width="80">
@@ -11,7 +11,7 @@
 ## install
 
 ```sh
-npm install @interweb-utils/casing
+npm install @interweb/casing
 ```
 
 ## Developing

@@ -33,11 +33,11 @@
     "@babel/parser": "^7.23.6",
     "@babel/traverse": "7.28.5",
     "@babel/types": "7.28.5",
-    "@interweb-utils/casing": "^0.3.0",
-    "@interweb/fetch-api-client": "^0.6.1",
+    "@interweb/casing": "workspace:*",
+    "@interweb/fetch-api-client": "workspace:*",
     "deepmerge": "^4.3.1",
     "fast-json-patch": "^3.1.1",
-    "schema-typescript": "^0.12.1"
+    "schema-typescript": "workspace:*"
   },
   "keywords": [
     "jsonschema",

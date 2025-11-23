@@ -1,5 +1,5 @@
 import * as t from '@babel/types';
-import { toPascalCase } from '@interweb-utils/casing';
+import { toPascalCase } from '@interweb/casing';
 import { minimatch } from 'minimatch';
 
 import { SchemaNamingStrategy } from './context';

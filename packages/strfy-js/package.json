@@ -51,7 +51,7 @@
     "esprima": "4.0.1",
     "jest": "^29.5.0",
     "jest-in-case": "1.0.2",
-    "nested-obj": "^0.0.1",
+    "nested-obj": "workspace:*",
     "prettier": "^2.8.7",
     "rimraf": "5.0.0",
     "ts-jest": "^29.1.0",
