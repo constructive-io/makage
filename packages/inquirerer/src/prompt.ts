@@ -1,4 +1,4 @@
-import chalk from 'chalk';
+import yanse, { red, whiteBright, yellow, gray, dim, green, cyan, white, blue } from 'yanse';
 import readline from 'readline';
 import { Readable, Writable } from 'stream';
 
@@ -62,16 +62,16 @@ const validationMessage = (question: Question, ctx: PromptContext): string => {
   }
 
   if (ctx.validation.reason) {
-    return chalk.red(`The field "${question.name}" is invalid: ${ctx.validation.reason}\n`);
+    return red(`The field "${question.name}" is invalid: ${ctx.validation.reason}\n`);
   }
 
   switch (ctx.validation.type) {
     case 'required':
-      return chalk.red(`The field "${question.name}" is required. Please provide a value.\n`);
+      return red(`The field "${question.name}" is required. Please provide a value.\n`);
     case 'pattern':
-      return chalk.red(`The field "${question.name}" does not match the pattern: ${question.pattern}.\n`);
+      return red(`The field "${question.name}" does not match the pattern: ${question.pattern}.\n`);
     default:
-      return chalk.red(`The field "${question.name}" is invalid. Please try again.\n`);
+      return red(`The field "${question.name}" is invalid. Please try again.\n`);
   }
 };
 class PromptContext {
@@ -124,7 +124,7 @@ function generatePromptMessageSuccinct(question: Question, ctx: PromptContext): 
   const lines: string[] = [];
 
   // 1. Main prompt label
-  lines.push(chalk.whiteBright.bold(message || `${name}?`));
+  lines.push(whiteBright.bold(message || `${name}?`));
 
   // 2. Validation message if applicable
   const validation = validationMessage(question, ctx);
@@ -139,14 +139,14 @@ function generatePromptMessageSuccinct(question: Question, ctx: PromptContext): 
     case 'confirm':
       inline = '(y/n)';
       if (def !== undefined) {
-        inline += ` ${chalk.yellow(`[${def ? 'y' : 'n'}]`)}`;
+        inline += ` ${yellow(`[${def ? 'y' : 'n'}]`)}`;
       }
       break;
 
     case 'text':
     case 'number':
       if (def !== undefined) {
-        inline += `${chalk.yellow(`[${def}]`)}`;
+        inline += `${yellow(`[${def}]`)}`;
       }
       break;
 
@@ -155,8 +155,8 @@ function generatePromptMessageSuccinct(question: Question, ctx: PromptContext): 
     case 'checkbox':
       if (def !== undefined) {
         const defaults = Array.isArray(def) ? def : [def];
-        const rendered = defaults.map(d => chalk.yellow(d)).join(chalk.gray(', '));
-        inline += `${chalk.yellow(`[${rendered}]`)}`;
+        const rendered = defaults.map(d => yellow(d)).join(gray(', '));
+        inline += `${yellow(`[${rendered}]`)}`;
       }
       break;
   }
@@ -184,11 +184,11 @@ function generatePromptMessage(question: Question, ctx: PromptContext): string {
   const lines: string[] = [];
 
   // 1. Title Message
-  lines.push(chalk.whiteBright.bold(message || `${name}?`));
+  lines.push(whiteBright.bold(message || `${name}?`));
 
   // 2. Optional description below title
   if (description) {
-    lines.push(chalk.dim(description));
+    lines.push(dim(description));
   }
 
   // 3. Validation warning (if failed before)
@@ -199,7 +199,7 @@ function generatePromptMessage(question: Question, ctx: PromptContext): string {
 
   // 4. Metadata (name/type)
   lines.push(
-    `${chalk.dim('Argument')} ${chalk.green(`--${name}`)} ${chalk.dim('type')} ${chalk.cyan(`[${type}]`)}`
+    `${dim('Argument')} ${green(`--${name}`)} ${dim('type')} ${cyan(`[${type}]`)}`
   );
 
   // 5. Default value or guidance
@@ -209,14 +209,14 @@ function generatePromptMessage(question: Question, ctx: PromptContext): string {
     case 'confirm':
       guidance = '(y/n)';
       if (def !== undefined) {
-        guidance += ` ${chalk.yellow(`[default: ${def ? 'y' : 'n'}]`)}`;
+        guidance += ` ${yellow(`[default: ${def ? 'y' : 'n'}]`)}`;
       }
       break;
 
     case 'text':
     case 'number':
       if (def !== undefined) {
-        guidance = chalk.yellow(`[default: ${def}]`);
+        guidance = yellow(`[default: ${def}]`);
       }
       break;
 
@@ -225,8 +225,8 @@ function generatePromptMessage(question: Question, ctx: PromptContext): string {
     case 'checkbox':
       if (def !== undefined) {
         const defaults = Array.isArray(def) ? def : [def];
-        const rendered = defaults.map(d => chalk.yellow(d)).join(chalk.gray(', '));
-        guidance += `${chalk.yellow(`[default: ${rendered}]`)}`;
+        const rendered = defaults.map(d => yellow(d)).join(gray(', '));
+        guidance += `${yellow(`[default: ${rendered}]`)}`;
       }
       break;
   }
@@ -236,7 +236,7 @@ function generatePromptMessage(question: Question, ctx: PromptContext): string {
   }
 
   // 6. Final input prompt
-  lines.push(chalk.white('> ') + chalk.dim('Your input:'));
+  lines.push(white('> ') + dim('Your input:'));
 
   return lines.join('\n') + '\n';
 }
@@ -309,7 +309,7 @@ export class Inquirerer {
   }
 
   private getInput(input: string) {
-    return `${chalk.white.bold('$')} ${input}`;
+    return `${white.bold('$')} ${input}`;
   }
 
   private getPrompt(question: Question, ctx: PromptContext, input: string) {
@@ -322,7 +322,7 @@ export class Inquirerer {
   }
 
   public generateManPage(opts: ManPageInfo): string {
-    let manPage = `${chalk.white('NAME')}\n\t${chalk.white(opts.commandName)} ${opts.description ?? ''}\n\n`;
+    let manPage = `${white('NAME')}\n\t${white(opts.commandName)} ${opts.description ?? ''}\n\n`;
 
     // Constructing the SYNOPSIS section with required and optional arguments
     let requiredArgs = '';
@@ -330,43 +330,43 @@ export class Inquirerer {
 
     opts.questions.forEach(question => {
       if (question.required) {
-        requiredArgs += ` ${chalk.white('--' + question.name)} <${chalk.gray(question.name)}>`;
+        requiredArgs += ` ${white('--' + question.name)} <${gray(question.name)}>`;
       } else {
-        optionalArgs += ` [${chalk.white('--' + question.name)}${question.default ? `=${chalk.gray(String(question.default))}` : ''}]`;
+        optionalArgs += ` [${white('--' + question.name)}${question.default ? `=${gray(String(question.default))}` : ''}]`;
       }
     });
 
-    manPage += `${chalk.white('SYNOPSIS')}\n\t${chalk.white(opts.commandName)}${chalk.gray(requiredArgs)}${chalk.gray(optionalArgs)}\n\n`;
-    manPage += `${chalk.white('DESCRIPTION')}\n\tUse this command to interact with the application. It supports the following options:\n\n`;
+    manPage += `${white('SYNOPSIS')}\n\t${white(opts.commandName)}${gray(requiredArgs)}${gray(optionalArgs)}\n\n`;
+    manPage += `${white('DESCRIPTION')}\n\tUse this command to interact with the application. It supports the following options:\n\n`;
 
     opts.questions.forEach(question => {
-      manPage += `${chalk.white(question.name.toUpperCase())}\n`;
-      manPage += `\t${chalk.white('Type:')} ${chalk.gray(question.type)}\n`;
+      manPage += `${white(question.name.toUpperCase())}\n`;
+      manPage += `\t${white('Type:')} ${gray(question.type)}\n`;
       if (question.message) {
-        manPage += `\t${chalk.white('Summary:')} ${chalk.gray(question.message)}\n`;
+        manPage += `\t${white('Summary:')} ${gray(question.message)}\n`;
       }
       if (question.description) {
-        manPage += `\t${chalk.white('Description:')} ${chalk.gray(question.description)}\n`;
+        manPage += `\t${white('Description:')} ${gray(question.description)}\n`;
       }
       if ('options' in question) {
         const optionsList = Array.isArray(question.options)
-          ? question.options.map(opt => typeof opt === 'string' ? chalk.gray(opt) : `${chalk.gray(opt.name)} (${chalk.gray(opt.value)})`).join(', ')
+          ? question.options.map(opt => typeof opt === 'string' ? gray(opt) : `${gray(opt.name)} (${gray(opt.value)})`).join(', ')
           : '';
-        manPage += `\t${chalk.white('Options:')} ${chalk.gray(optionsList)}\n`;
+        manPage += `\t${white('Options:')} ${gray(optionsList)}\n`;
       }
       if (question.default !== undefined) {
-        manPage += `\t${chalk.white('Default:')} ${chalk.gray(JSON.stringify(question.default))}\n`;
+        manPage += `\t${white('Default:')} ${gray(JSON.stringify(question.default))}\n`;
       }
       if (question.required) {
-        manPage += `\t${chalk.white('Required:')} ${chalk.gray('Yes')}\n`;
+        manPage += `\t${white('Required:')} ${gray('Yes')}\n`;
       } else {
-        manPage += `\t${chalk.white('Required:')} ${chalk.gray('No')}\n`;
+        manPage += `\t${white('Required:')} ${gray('No')}\n`;
       }
       manPage += '\n';
     });
 
-    manPage += `${chalk.white('EXAMPLES')}\n\tExample usage of \`${chalk.white(opts.commandName)}\`.\n\t$ ${chalk.white(opts.commandName)}${chalk.gray(requiredArgs)}${chalk.gray(optionalArgs)}\n\n`;
-    manPage += opts.author ? `${chalk.white('AUTHOR')}\n\t${chalk.white(opts.author)}\n` : '';
+    manPage += `${white('EXAMPLES')}\n\tExample usage of \`${white(opts.commandName)}\`.\n\t$ ${white(opts.commandName)}${gray(requiredArgs)}${gray(optionalArgs)}\n\n`;
+    manPage += opts.author ? `${white('AUTHOR')}\n\t${white(opts.author)}\n` : '';
     return manPage;
   }
 
@@ -812,7 +812,7 @@ export class Inquirerer {
         if (index >= 0) {
           const isChecked = selections[index] ? '◉' : '○'; // Use the original index in options
           const line = `${marker} ${isChecked} ${option.name}`;
-          this.log(isSelected ? chalk.blue(line) : line);
+          this.log(isSelected ? blue(line) : line);
         } else {
           this.log('No options'); // sometimes user searches and there are no options...
         }
@@ -924,7 +924,7 @@ export class Inquirerer {
         if (!option) {
           this.log('No options'); // sometimes user searches and there are no options...
         } else if (i === selectedIndex) {
-          this.log(chalk.blue('> ' + option.name)); // Highlight the selected option with chalk
+          this.log(blue('> ' + option.name)); // Highlight the selected option with yanse
         } else {
           this.log('  ' + option.name);
         }
@@ -1020,7 +1020,7 @@ export class Inquirerer {
         if (!option) {
           this.log('No options'); // sometimes user searches and there are no options...
         } else if (i === selectedIndex) {
-          this.log(chalk.blue('> ' + option.name)); // Highlight the selected option with chalk
+          this.log(blue('> ' + option.name)); // Highlight the selected option with yanse
         } else {
           this.log('  ' + option.name);
         }

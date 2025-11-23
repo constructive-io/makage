@@ -1,12 +1,12 @@
-import chalk from 'chalk';
+import { green, blue } from 'yanse';
 
 import { readAndParsePackageJson } from "./package";
 
 // Function to display the version information
 export function displayVersion(): any {
   const pkg = readAndParsePackageJson();
-  console.log(chalk.green(`Name: ${pkg.name}`));
-  console.log(chalk.blue(`Version: ${pkg.version}`));
+  console.log(green(`Name: ${pkg.name}`));
+  console.log(blue(`Version: ${pkg.version}`));
 }
 
 
