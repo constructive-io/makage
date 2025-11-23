@@ -1,6 +1,6 @@
 {
   "name": "schema-sdk",
-  "version": "0.15.2",
+  "version": "0.15.3",
   "description": "Convert JSON Schema OpenAPI Spec to TypeScript Clients",
   "author": "Dan Lynch <pyramation@gmail.com>",
   "homepage": "https://github.com/hyperweb-io/dev-utils",
@@ -33,10 +33,10 @@
     "@babel/parser": "^7.23.6",
     "@babel/traverse": "7.28.5",
     "@babel/types": "7.28.5",
-    "komoji": "workspace:*",
     "@interweb/fetch-api-client": "workspace:*",
     "deepmerge": "^4.3.1",
     "fast-json-patch": "^3.1.1",
+    "komoji": "workspace:*",
     "schema-typescript": "workspace:*"
   },
   "keywords": [
