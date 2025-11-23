@@ -6,7 +6,7 @@
   "main": "index.js",
   "module": "esm/index.js",
   "types": "index.d.ts",
-  "homepage": "https://github.com/pyramation/inquirerer",
+  "homepage": "https://github.com/hyperweb-io/dev-utils",
   "license": "SEE LICENSE IN LICENSE",
   "publishConfig": {
     "access": "public",
@@ -14,14 +14,14 @@
   },
   "repository": {
     "type": "git",
-    "url": "https://github.com/pyramation/inquirerer"
+    "url": "https://github.com/hyperweb-io/dev-utils"
   },
   "bugs": {
-    "url": "https://github.com/pyramation/inquirerer/issues"
+    "url": "https://github.com/hyperweb-io/dev-utils/issues"
   },
   "scripts": {
-    "copy": "copyfiles -f ../../LICENSE README.md package.json dist",
-    "clean": "del dist/**",
+    "copy": "cpy ../../LICENSE README.md package.json dist --flat",
+    "clean": "rimraf dist/**",
     "prepare": "npm run build",
     "build": "npm run clean; tsc; tsc -p tsconfig.esm.json; npm run copy",
     "dev": "ts-node dev/index",

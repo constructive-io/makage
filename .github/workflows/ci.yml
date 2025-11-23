@@ -58,6 +58,8 @@ jobs:
           - schema-typescript
           - strfy-js
           - yanse
+          - inquirerer
+          - create-gen-app
 
     steps:
     - name: Checkout code
