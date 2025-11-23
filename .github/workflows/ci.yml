@@ -57,6 +57,7 @@ jobs:
           - schema-sdk
           - schema-typescript
           - strfy-js
+          - yanse
 
     steps:
     - name: Checkout code

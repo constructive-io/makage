@@ -1,0 +1,32 @@
+{
+  "name": "yanse",
+  "version": "0.1.0",
+  "author": "Dan Lynch <pyramation@gmail.com>",
+  "description": "Fast and lightweight terminal color styling library with chalk-like API",
+  "main": "index.js",
+  "module": "esm/index.js",
+  "types": "index.d.ts",
+  "homepage": "https://github.com/hyperweb-io/dev-utils",
+  "license": "MIT",
+  "publishConfig": {
+    "access": "public",
+    "directory": "dist"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/hyperweb-io/dev-utils"
+  },
+  "bugs": {
+    "url": "https://github.com/hyperweb-io/dev-utils/issues"
+  },
+  "scripts": {
+    "copy": "cpy ../../LICENSE README.md package.json dist --flat",
+    "clean": "rimraf dist/**",
+    "prepublishOnly": "npm run build",
+    "build": "npm run clean; tsc; tsc -p tsconfig.esm.json; npm run copy",
+    "lint": "eslint . --fix",
+    "test": "jest",
+    "test:watch": "jest --watch"
+  },
+  "keywords": []
+}
