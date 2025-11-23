@@ -1,6 +1,6 @@
 {
   "name": "@interweb/casing",
-  "version": "0.7.1",
+  "version": "0.7.2",
   "author": "Dan Lynch <pyramation@gmail.com>",
   "description": "Interweb casing utils",
   "main": "index.js",

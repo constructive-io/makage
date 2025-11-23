@@ -1,6 +1,6 @@
 {
   "name": "jsonldjs",
-  "version": "0.2.1",
+  "version": "0.2.2",
   "description": "JSON-LD Tooling",
   "author": "Dan Lynch <pyramation@gmail.com>",
   "homepage": "https://github.com/hyperweb-io/dev-utils",
