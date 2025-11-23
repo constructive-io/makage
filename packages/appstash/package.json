@@ -1,6 +1,6 @@
 {
   "name": "appstash",
-  "version": "0.1.0",
+  "version": "0.2.0",
   "author": "Dan Lynch <pyramation@gmail.com>",
   "description": "Simple, clean application directory resolution",
   "main": "index.js",

@@ -1,6 +1,6 @@
 {
   "name": "komoji",
-  "version": "0.7.3",
+  "version": "0.7.4",
   "author": "Dan Lynch <pyramation@gmail.com>",
   "description": "the tiny case transformer — effortlessly transform strings between naming conventions",
   "main": "index.js",

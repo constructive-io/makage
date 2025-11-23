@@ -1,6 +1,6 @@
 {
   "name": "inquirerer",
-  "version": "2.1.0",
+  "version": "2.1.1",
   "author": "Dan Lynch <pyramation@gmail.com>",
   "description": "inquirerer",
   "main": "index.js",
@@ -29,10 +29,10 @@
     "test:watch": "jest --watch"
   },
   "dependencies": {
-    "yanse": "workspace:*",
     "deepmerge": "^4.3.1",
     "js-yaml": "^4.1.0",
-    "minimist": "^1.2.8"
+    "minimist": "^1.2.8",
+    "yanse": "workspace:*"
   },
   "keywords": [],
   "devDependencies": {
