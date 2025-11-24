@@ -46,7 +46,7 @@ function printHelp() {
 makage – tiny build helper
 
 Usage:
-  makage clean <path...>
+  makage clean [path...]          (defaults to "dist")
   makage copy [...sources] <dest> [--flat]
   makage readme-footer --source <file> --footer <file> --dest <file>
   makage assets

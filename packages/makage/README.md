@@ -52,8 +52,9 @@ npm install makage
 ### CLI Commands
 
 ```bash
-# Clean build directories
-makage clean dist
+# Clean build directories (defaults to "dist")
+makage clean
+makage clean dist build temp  # or specify multiple directories
 
 # Copy files to destination
 makage copy ../../LICENSE README.md package.json dist --flat
@@ -78,8 +79,8 @@ Replace your existing build scripts with `makage`:
 ```json
 {
   "scripts": {
-    "clean": "makage clean dist",
-    "build": "makage clean dist && makage build-ts && makage assets",
+    "clean": "makage clean",
+    "build": "makage clean && makage build-ts && makage assets",
     "prepublishOnly": "npm run build"
   }
 }
@@ -91,7 +92,7 @@ Or using the simplified pattern:
 {
   "scripts": {
     "copy": "makage assets",
-    "clean": "makage clean dist",
+    "clean": "makage clean",
     "build": "npm run clean && tsc && tsc -p tsconfig.esm.json && npm run copy"
   }
 }
@@ -99,12 +100,13 @@ Or using the simplified pattern:
 
 ## Commands
 
-### `makage clean <path...>`
+### `makage clean [path...]`
 
-Recursively removes one or more paths.
+Recursively removes one or more paths. Defaults to removing `dist` if no paths are specified.
 
 ```bash
-makage clean dist build temp
+makage clean              # removes dist
+makage clean dist build temp  # removes multiple directories
 ```
 
 ### `makage copy [...sources] <dest> [--flat]`
@@ -171,7 +173,7 @@ You can also use `makage` commands programmatically:
 import { runCopy, runClean, runAssets } from 'makage';
 
 async function build() {
-  await runClean(['dist']);
+  await runClean([]);  // defaults to ['dist']
   // ... your build steps
   await runAssets([]);
 }

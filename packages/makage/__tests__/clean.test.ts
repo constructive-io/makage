@@ -25,7 +25,9 @@ describe('runClean', () => {
     expect(mockedFs.rm).toHaveBeenCalledWith('temp', { recursive: true, force: true });
   });
 
-  it('should throw error if no paths provided', async () => {
-    await expect(runClean([])).rejects.toThrow('clean requires at least one path');
+  it('should default to "dist" if no paths provided', async () => {
+    await runClean([]);
+
+    expect(mockedFs.rm).toHaveBeenCalledWith('dist', { recursive: true, force: true });
   });
 });

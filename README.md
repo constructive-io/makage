@@ -40,8 +40,8 @@ Replace your existing build scripts with `makage`:
 ```json
 {
   "scripts": {
-    "clean": "makage clean dist",
-    "build": "makage clean dist && makage build-ts && makage assets",
+    "clean": "makage clean",
+    "build": "makage clean && makage build-ts && makage assets",
     "prepublishOnly": "npm run build"
   }
 }
@@ -52,8 +52,9 @@ Replace your existing build scripts with `makage`:
 ### CLI Commands
 
 ```bash
-# Clean build directories
-makage clean dist
+# Clean build directories (defaults to "dist")
+makage clean
+makage clean dist build temp  # or specify multiple directories
 
 # Copy files to destination
 makage copy ../../LICENSE README.md package.json dist --flat

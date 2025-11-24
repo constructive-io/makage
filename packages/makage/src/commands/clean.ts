@@ -1,11 +1,9 @@
 import fs from 'node:fs/promises';
 
 export async function runClean(paths: string[]) {
-  if (!paths.length) {
-    throw new Error('clean requires at least one path');
-  }
+  const pathsToClean = paths.length ? paths : ['dist'];
 
-  for (const p of paths) {
+  for (const p of pathsToClean) {
     await fs.rm(p, { recursive: true, force: true });
     console.log(`[makage] removed ${p}`);
   }
