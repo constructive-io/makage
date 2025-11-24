@@ -21,7 +21,7 @@
   },
   "scripts": {
     "copy": "makage assets",
-    "clean": "makage clean dist",
+    "clean": "rimraf dist",
     "prepublishOnly": "npm run build",
     "build": "npm run clean && makage build-ts && npm run copy",
     "dev": "ts-node dev/index",

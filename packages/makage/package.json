@@ -33,7 +33,7 @@
   },
   "scripts": {
     "copy": "cpy ../../LICENSE README.md package.json dist --flat",
-    "clean": "rimraf dist/**",
+    "clean": "rimraf dist",
     "prepublishOnly": "npm run build",
     "build": "npm run clean; tsc; tsc -p tsconfig.esm.json; npm run copy",
     "lint": "eslint . --fix",

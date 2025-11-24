@@ -21,7 +21,7 @@
   ],
   "scripts": {
     "copy": "makage assets",
-    "clean": "makage clean dist",
+    "clean": "rimraf dist",
     "prepublishOnly": "pnpm run build",
     "build": "pnpm run clean && makage build-ts && pnpm run copy",
     "test": "jest",
