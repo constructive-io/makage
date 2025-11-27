@@ -6,7 +6,7 @@ import { runAssets } from './commands/assets';
 import { runBuild } from './commands/build';
 import { runBuildTs } from './commands/buildTs';
 import { runUpdateWorkspace } from './commands/updateWorkspace';
-import { runTest } from './commands/test';
+import { runTest } from './commands/testCommand';
 
 const [, , cmd, ...rest] = process.argv;
 
