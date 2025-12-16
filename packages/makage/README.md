@@ -92,18 +92,6 @@ Or with recursive patterns:
 "copy:all-sql": "makage copy src/**/*.sql dist/sql --flat"
 ```
 
-### Watching Tests
-
-**Before:**
-```json
-"test:watch": "nodemon --watch deploy --watch revert --ext sql --exec 'jest'"
-```
-
-**After:**
-```json
-"test:watch": "makage test --watch deploy,revert --ext sql"
-```
-
 > **Note:** For convenience, `makage assets` combines copy + footer functionality and is kept for backwards compatibility.
 
 ## Assumptions
@@ -253,41 +241,6 @@ Run from the monorepo root:
 ```bash
 makage update-workspace
 ```
-
-makage update-workspace
-```
-
-### `makage test [--runner <cmd>] [--watch <dirs>] [--ext <exts>] [-- <args...>]`
-
-Runs tests using a specified runner (defaults to `jest`). Automatically switches to `nodemon` if watch directories or extensions are specified.
-
-- Use `--runner` to specify a custom test runner (e.g., `vitest`, `node --test`)
-- Use `--watch` to enable watch mode. If followed by directories (comma-separated), it uses `nodemon` to watch those directories.
-- Use `--ext` to specify file extensions to watch (comma-separated). Implies `nodemon`.
-- Use `--` to pass additional arguments to the runner.
-
-```bash
-# Default (runs jest)
-makage test
-
-# Watch mode (runs jest --watch)
-makage test --watch
-
-# Custom runner
-makage test --runner vitest
-
-# Watch specific directories (uses nodemon)
-makage test --watch dir1,dir2
-
-# Watch specific extensions (uses nodemon)
-makage test --ext js,sql,ts
-
-# Complex example: Watch dirs and extensions, run custom command
-# Runs: nodemon --watch dir1 --watch dir2 --ext sql,js --exec "vitest --runInBand"
-makage test --watch dir1,dir2 --ext sql,js --runner vitest -- --runInBand
-```
-
-### `makage update-workspace`
 
 This will:
 1. Scan all packages in the `packages/` directory
