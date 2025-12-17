@@ -6,7 +6,6 @@ import { runAssets } from './commands/assets';
 import { runBuild } from './commands/build';
 import { runBuildTs } from './commands/buildTs';
 import { runUpdateWorkspace } from './commands/updateWorkspace';
-import { runTest } from './commands/testCommand';
 
 const [, , cmd, ...rest] = process.argv;
 
@@ -34,9 +33,6 @@ async function main() {
       case 'update-workspace':
         await runUpdateWorkspace(rest);
         break;
-      case 'test':
-        await runTest(rest);
-        break;
       case '-h':
       case '--help':
       default:
@@ -61,7 +57,6 @@ Usage:
   makage assets
   makage build-ts [--dev]
   makage update-workspace
-  makage test [--runner <cmd>] [--watch] [-- <args...>]
 `);
 }
 
