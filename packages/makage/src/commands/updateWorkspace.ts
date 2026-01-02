@@ -1,5 +1,7 @@
 import fs from 'node:fs/promises';
 import path from 'node:path';
+import { glob } from 'glob';
+import { parse as parseYaml } from 'yaml';
 
 const DEPENDENCY_TYPES = [
   'dependencies',
@@ -8,36 +10,53 @@ const DEPENDENCY_TYPES = [
   'optionalDependencies'
 ] as const;
 
-export async function runUpdateWorkspace(_args: string[]) {
-  // Find all package.json files in the workspace
-  const packagesDir = path.join(process.cwd(), 'packages');
+interface PnpmWorkspace {
+  packages?: string[];
+}
 
+export async function runUpdateWorkspace(_args: string[]) {
+  const cwd = process.cwd();
+  const workspaceFile = path.join(cwd, 'pnpm-workspace.yaml');
+
+  // Read and parse pnpm-workspace.yaml
+  let workspaceConfig: PnpmWorkspace;
   try {
-    await fs.access(packagesDir);
+    const content = await fs.readFile(workspaceFile, 'utf-8');
+    workspaceConfig = parseYaml(content) as PnpmWorkspace;
   } catch {
-    throw new Error('No "packages" directory found. Run this command from the monorepo root.');
+    throw new Error('No "pnpm-workspace.yaml" found. Run this command from the monorepo root.');
   }
 
-  const dirs = await fs.readdir(packagesDir, { withFileTypes: true });
-  const packageDirs = dirs
-    .filter(dirent => dirent.isDirectory())
-    .map(dirent => dirent.name);
+  const patterns = workspaceConfig.packages;
+  if (!patterns || patterns.length === 0) {
+    throw new Error('No package patterns found in pnpm-workspace.yaml');
+  }
 
-  const packageFiles: string[] = [];
-  for (const dir of packageDirs) {
-    const pkgPath = path.join(packagesDir, dir, 'package.json');
-    try {
-      await fs.access(pkgPath);
-      packageFiles.push(path.join(dir, 'package.json'));
-    } catch {
-      // Skip if no package.json
-    }
+  console.log(`[makage] Workspace patterns:`, patterns);
+
+  // Find all package.json files matching the workspace patterns
+  const packageJsonPatterns = patterns.map(p => {
+    // Convert workspace pattern to package.json glob
+    // e.g., 'packages/*' -> 'packages/*/package.json'
+    const normalized = p.replace(/\/?\*\*?$/, '');
+    return `${normalized}/*/package.json`;
+  });
+
+  const packageFiles = await glob(packageJsonPatterns, {
+    cwd,
+    absolute: false,
+    ignore: ['**/node_modules/**']
+  });
+
+  if (packageFiles.length === 0) {
+    console.log('[makage] No packages found matching workspace patterns');
+    return;
   }
 
   // Build a set of internal package names
   const internalPackages = new Set<string>();
   for (const file of packageFiles) {
-    const pkgPath = path.join(packagesDir, file);
+    const pkgPath = path.join(cwd, file);
     const content = await fs.readFile(pkgPath, 'utf-8');
     const pkg = JSON.parse(content);
     if (pkg.name) {
@@ -50,7 +69,7 @@ export async function runUpdateWorkspace(_args: string[]) {
   // Update each package.json
   let totalUpdates = 0;
   for (const file of packageFiles) {
-    const pkgPath = path.join(packagesDir, file);
+    const pkgPath = path.join(cwd, file);
     const content = await fs.readFile(pkgPath, 'utf-8');
     const pkg = JSON.parse(content);
 

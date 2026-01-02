@@ -31,6 +31,10 @@
   "bugs": {
     "url": "https://github.com/hyperweb-io/makage/issues"
   },
+  "dependencies": {
+    "glob": "^11.0.0",
+    "yaml": "^2.7.0"
+  },
   "scripts": {
     "copy": "cpy ../../LICENSE README.md package.json dist --flat",
     "clean": "rimraf dist",
