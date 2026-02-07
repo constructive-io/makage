@@ -14,20 +14,20 @@ describe('runClean', () => {
   it('should remove a single path', async () => {
     await runClean(['dist']);
 
-    expect(mockedFs.rm).toHaveBeenCalledWith('dist', { recursive: true, force: true });
+    expect(mockedFs.rm).toHaveBeenCalledWith('dist', { recursive: true, force: true, maxRetries: 3, retryDelay: 100 });
   });
 
   it('should remove multiple paths', async () => {
     await runClean(['dist', 'build', 'temp']);
 
-    expect(mockedFs.rm).toHaveBeenCalledWith('dist', { recursive: true, force: true });
-    expect(mockedFs.rm).toHaveBeenCalledWith('build', { recursive: true, force: true });
-    expect(mockedFs.rm).toHaveBeenCalledWith('temp', { recursive: true, force: true });
+    expect(mockedFs.rm).toHaveBeenCalledWith('dist', { recursive: true, force: true, maxRetries: 3, retryDelay: 100 });
+    expect(mockedFs.rm).toHaveBeenCalledWith('build', { recursive: true, force: true, maxRetries: 3, retryDelay: 100 });
+    expect(mockedFs.rm).toHaveBeenCalledWith('temp', { recursive: true, force: true, maxRetries: 3, retryDelay: 100 });
   });
 
   it('should default to "dist" if no paths provided', async () => {
     await runClean([]);
 
-    expect(mockedFs.rm).toHaveBeenCalledWith('dist', { recursive: true, force: true });
+    expect(mockedFs.rm).toHaveBeenCalledWith('dist', { recursive: true, force: true, maxRetries: 3, retryDelay: 100 });
   });
 });
