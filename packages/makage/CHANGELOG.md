@@ -3,6 +3,12 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+## [0.1.11](https://github.com/hyperweb-io/makage/compare/makage@0.1.10...makage@0.1.11) (2026-02-07)
+
+### Bug Fixes
+
+- resolve LICENSE and FOOTER.md from workspace root instead of hardcoded ../../ ([d4a7dba](https://github.com/hyperweb-io/makage/commit/d4a7dbadbb76d6434e77f97aa5d90396de823fc2))
+
 ## [0.1.10](https://github.com/hyperweb-io/makage/compare/makage@0.1.9...makage@0.1.10) (2026-01-02)
 
 **Note:** Version bump only for package makage
