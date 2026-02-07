@@ -1,5 +1,6 @@
 import fs from 'node:fs/promises';
 import path from 'node:path';
+import { findRootFile } from './workspace';
 
 interface CopyOptions {
   flat: boolean;
@@ -152,18 +153,19 @@ function matchPattern(name: string, pattern: string): boolean {
 async function copyReadmeWithFooter(readmePath: string, target: string) {
   const readme = await fs.readFile(readmePath, 'utf8');
 
-  // Look for FOOTER.md in the monorepo root (../../FOOTER.md relative to current dir)
-  const footerPath = path.join('../../FOOTER.md');
+  const footerPath = await findRootFile('FOOTER.md', process.cwd());
 
   let footer: string | null = null;
-  try {
-    footer = await fs.readFile(footerPath, 'utf8');
-  } catch (err: any) {
-    if (err.code === 'ENOENT') {
-      console.log(`[makage] warning: ${footerPath} not found, copying README without footer`);
-    } else {
-      throw err;
+  if (footerPath) {
+    try {
+      footer = await fs.readFile(footerPath, 'utf8');
+    } catch (err: any) {
+      if (err.code !== 'ENOENT') throw err;
     }
+  }
+
+  if (!footer) {
+    console.log('[makage] no FOOTER.md found at workspace root, copying README without footer');
   }
 
   const combined = footer
