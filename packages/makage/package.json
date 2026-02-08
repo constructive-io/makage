@@ -1,6 +1,6 @@
 {
   "name": "makage",
-  "version": "0.1.11",
+  "version": "0.1.12",
   "author": "Dan Lynch <pyramation@gmail.com>",
   "description": "Tiny build helper for monorepo packages - cross-platform copy, clean, and asset management",
   "main": "index.js",

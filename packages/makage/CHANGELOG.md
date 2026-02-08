@@ -3,6 +3,12 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+## [0.1.12](https://github.com/hyperweb-io/makage/compare/makage@0.1.11...makage@0.1.12) (2026-02-08)
+
+### Bug Fixes
+
+- add maxRetries to fs.rm in clean to handle ENOTEMPTY race conditions ([2315396](https://github.com/hyperweb-io/makage/commit/2315396cb6fd4e451b7db831f911bcfca2cba2e7))
+
 ## [0.1.11](https://github.com/hyperweb-io/makage/compare/makage@0.1.10...makage@0.1.11) (2026-02-07)
 
 ### Bug Fixes
