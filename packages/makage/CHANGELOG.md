@@ -3,6 +3,12 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+# [0.2.0](https://github.com/hyperweb-io/makage/compare/makage@0.1.12...makage@0.2.0) (2026-03-17)
+
+### Features
+
+- add update-deps command for cross-repo dependency sync ([0d51d4c](https://github.com/hyperweb-io/makage/commit/0d51d4c104489b761074d1e7a37104b2d418793e))
+
 ## [0.1.12](https://github.com/hyperweb-io/makage/compare/makage@0.1.11...makage@0.1.12) (2026-02-08)
 
 ### Bug Fixes
