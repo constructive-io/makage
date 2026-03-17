@@ -5,4 +5,5 @@ export { runAssets } from './commands/assets';
 export { runBuild } from './commands/build';
 export { runBuildTs } from './commands/buildTs';
 export { runUpdateWorkspace } from './commands/updateWorkspace';
+export { runUpdateDeps } from './commands/updateDeps';
 export { findWorkspaceRoot, findRootFile } from './commands/workspace';
