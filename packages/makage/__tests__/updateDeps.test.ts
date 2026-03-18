@@ -155,6 +155,68 @@ describe('runUpdateDeps', () => {
     expect(result.has_dep_changes).toBe(false);
   });
 
+  it('should scan all package.json files in non-workspace target repos', async () => {
+    // Source workspace has one package
+    mockedFs.readFile.mockImplementation(async (filePath: any) => {
+      const p = filePath.toString();
+      if (p.endsWith('pnpm-workspace.yaml') && p.includes('source')) {
+        return WORKSPACE_YAML;
+      }
+      if (p.endsWith('pnpm-workspace.yaml') && p.includes('boilerplate')) {
+        throw new Error('ENOENT');
+      }
+      // Source package
+      if (p.includes('source') && p.includes('packages/foo/package.json')) {
+        return makePkg('@scope/foo', '3.0.0');
+      }
+      // Boilerplate target — multiple independent package.json files, no workspace
+      if (p.includes('boilerplate') && p.includes('graphql/codegen/package.json')) {
+        return makePkg('codegen-template', '0.0.1', { '@scope/foo': '^2.0.0' });
+      }
+      if (p.includes('boilerplate') && p.includes('nextjs/app/package.json')) {
+        return makePkg('nextjs-template', '0.0.1', {}, { '@scope/foo': '^3.0.0' });
+      }
+      if (p.includes('boilerplate') && p.endsWith('package.json') && !p.includes('graphql') && !p.includes('nextjs')) {
+        return makePkg('boilerplate-root', '1.0.0');
+      }
+      throw new Error(`ENOENT: ${p}`);
+    });
+
+    mockedGlob.mockImplementation(async (patterns: any, opts: any) => {
+      const cwd = opts?.cwd || '';
+      if (cwd.includes('source')) {
+        return ['packages/foo/package.json'];
+      }
+      // Non-workspace target — glob returns all nested package.json files
+      if (cwd.includes('boilerplate')) {
+        return ['package.json', 'graphql/codegen/package.json', 'nextjs/app/package.json'];
+      }
+      return [];
+    });
+
+    const result = await runUpdateDeps(['--from', '/source', '--in', '/boilerplate']);
+
+    // Should find the source package
+    expect(result.sourcePackages).toHaveLength(1);
+    expect(result.sourcePackages[0].name).toBe('@scope/foo');
+
+    // Should match deps in both nested templates (not root — root has no matching deps)
+    expect(result.matchedPackages).toHaveLength(2);
+
+    // codegen-template has @scope/foo ^2.0.0 -> 3.0.0 (outdated)
+    const codegenMatch = result.matchedPackages.find(p => p.consumer === 'codegen-template');
+    expect(codegenMatch?.outdated).toBe(true);
+    expect(codegenMatch?.depType).toBe('dependencies');
+
+    // nextjs-template has @scope/foo ^3.0.0 -> 3.0.0 (up to date)
+    const nextjsMatch = result.matchedPackages.find(p => p.consumer === 'nextjs-template');
+    expect(nextjsMatch?.outdated).toBe(false);
+    expect(nextjsMatch?.depType).toBe('devDependencies');
+
+    expect(result.has_dep_changes).toBe(true);
+    expect(result.outdatedPackages).toHaveLength(1);
+  });
+
   it('should handle workspace: protocol as not outdated', async () => {
     mockedFs.readFile.mockImplementation(async (filePath: any) => {
       const p = filePath.toString();
