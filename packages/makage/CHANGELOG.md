@@ -3,6 +3,12 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+# [0.3.0](https://github.com/hyperweb-io/makage/compare/makage@0.2.0...makage@0.3.0) (2026-03-18)
+
+### Features
+
+- scan all package.json files in non-workspace target repos ([5bc5a24](https://github.com/hyperweb-io/makage/commit/5bc5a24fc5c5e1e141a726d6d3cd04c5408ddd0e))
+
 # [0.2.0](https://github.com/hyperweb-io/makage/compare/makage@0.1.12...makage@0.2.0) (2026-03-17)
 
 ### Features
