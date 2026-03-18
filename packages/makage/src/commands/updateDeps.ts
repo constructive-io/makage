@@ -151,7 +151,19 @@ async function getTargetPackageFiles(targetRoot: string): Promise<string[]> {
     // Not a monorepo — fall through
   }
 
-  return ['package.json'];
+  // No workspace — scan for all package.json files recursively
+  const allFiles = await glob('**/package.json', {
+    cwd: targetRoot,
+    absolute: false,
+    ignore: ['**/node_modules/**']
+  });
+
+  // Always include root package.json first if it exists
+  if (allFiles.includes('package.json')) {
+    return ['package.json', ...allFiles.filter(f => f !== 'package.json')];
+  }
+
+  return allFiles.length > 0 ? allFiles : ['package.json'];
 }
 
 export async function runUpdateDeps(args: string[]): Promise<UpdateDepsResult> {
