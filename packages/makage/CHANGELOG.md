@@ -3,6 +3,10 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+## [0.3.1](https://github.com/constructive-io/makage/compare/makage@0.3.0...makage@0.3.1) (2026-05-29)
+
+**Note:** Version bump only for package makage
+
 # [0.3.0](https://github.com/hyperweb-io/makage/compare/makage@0.2.0...makage@0.3.0) (2026-03-18)
 
 ### Features
