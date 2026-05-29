@@ -1,14 +1,14 @@
 # makage
 
 <p align="center">
-  <img src="https://raw.githubusercontent.com/hyperweb-io/makage/refs/heads/main/docs/img/logo.svg" width="80">
+  <img src="https://raw.githubusercontent.com/constructive-io/makage/refs/heads/main/docs/img/logo.svg" width="80">
   <br />
   Tiny build helper for monorepo packages
   <br />
-  <a href="https://github.com/hyperweb-io/makage/actions/workflows/ci.yml">
-    <img height="20" src="https://github.com/hyperweb-io/makage/actions/workflows/ci.yml/badge.svg" />
+  <a href="https://github.com/constructive-io/makage/actions/workflows/ci.yml">
+    <img height="20" src="https://github.com/constructive-io/makage/actions/workflows/ci.yml/badge.svg" />
   </a>
-  <a href="https://github.com/hyperweb-io/makage/blob/main/LICENSE">
+  <a href="https://github.com/constructive-io/makage/blob/main/LICENSE">
     <img height="20" src="https://img.shields.io/badge/license-MIT-blue.svg">
   </a>
 </p>
@@ -146,7 +146,68 @@ makage readme-footer --source README.md --footer FOOTER.md --dest dist/README.md
 
 # Update workspace dependencies
 makage update-workspace
+
+# Detect outdated cross-repo dependencies (structured JSON output)
+makage update-deps --from ./constructive --in .
 ```
+
+## Cross-Repo Dependency Updates (`update-deps`)
+
+The `update-deps` command enables deterministic, version-aware dependency synchronization across repositories. It is the engine behind the [constructive-hub update-constructive-deps workflow](https://github.com/constructive-io/constructive-hub/blob/main/.github/workflows/update-constructive-deps.yml).
+
+### How it works
+
+1. **Discovers** all packages in a source pnpm workspace (by reading `pnpm-workspace.yaml`)
+2. **Scans** the target repo's `package.json` files (supports both monorepo and non-workspace layouts)
+3. **Cross-references** dependencies to find packages that exist in both source and target
+4. **Compares versions** using semver to identify outdated packages
+5. **Outputs structured JSON** to stdout for CI consumption (logs go to stderr)
+
+### Usage
+
+```bash
+makage update-deps --from <source-workspace> --in <target-repo>
+```
+
+| Flag | Description |
+|------|-------------|
+| `--from` | Path to the source pnpm workspace (contains `pnpm-workspace.yaml`) |
+| `--in` | Path to the target repo to scan for outdated deps |
+
+### Output format
+
+```json
+{
+  "sourcePackages": [{ "name": "@constructive/foo", "version": "1.2.3", "path": "packages/foo" }],
+  "matchedPackages": [{ "name": "@constructive/foo", "currentVersion": "^1.1.0", "availableVersion": "1.2.3", "depType": "dependencies", "consumer": "@myapp/bar", "outdated": true }],
+  "outdatedPackages": [/* subset of matchedPackages where outdated=true */],
+  "has_dep_changes": true
+}
+```
+
+### CI Integration
+
+The `update-deps` command is used in GitHub Actions to automatically update downstream repos when the source workspace publishes new versions. The typical CI flow:
+
+1. Check out the target repo + source workspace side by side
+2. Run `makage update-deps --from ./constructive --in .` for structured JSON detection
+3. Parse the JSON output to extract outdated package names
+4. Run `pnpm update -r --latest <packages...>` to update them
+5. Create a PR with the results
+
+Target repos are categorized into two strategies:
+- **Workspace repos** (have `pnpm-workspace.yaml`): Use `pnpm update -r --latest` for bulk updates
+- **Non-workspace repos** (e.g., template repos): Update each `package.json` individually via `jq` or per-directory `pnpm update`
+
+### Supported target repos
+
+The constructive-hub workflow currently updates:
+- `constructive-db` (default, also triggers schema propagation)
+- `dashboard`
+- `pgpm-modules`
+- `dev-utils`
+- `sandbox-templates`
+- `pgpm-boilerplates`
 
 ## Documentation
 
@@ -159,7 +220,7 @@ For detailed usage and API documentation, see [packages/makage/README.md](./pack
 1. Clone the repository:
 
 ```bash
-git clone https://github.com/hyperweb-io/makage.git
+git clone https://github.com/constructive-io/makage.git
 ```
 
 2. Install dependencies:
@@ -180,7 +241,7 @@ pnpm test:watch
 ## Credits
 
 Built for developers, with developers.  
-👉 https://launchql.com | https://hyperweb.io
+👉 https://constructive.io
 
 ## Disclaimer
 

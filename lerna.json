@@ -11,7 +11,7 @@
   "registry": "https://registry.npmjs.org",
   "command": {
     "create": {
-      "homepage": "https://github.com/hyperweb-io/makage",
+      "homepage": "https://github.com/constructive-io/makage",
       "license": "MIT",
       "access": "restricted"
     },
