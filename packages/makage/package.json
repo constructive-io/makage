@@ -9,7 +9,7 @@
   "bin": {
     "makage": "cli.js"
   },
-  "homepage": "https://github.com/hyperweb-io/makage",
+  "homepage": "https://github.com/constructive-io/makage",
   "license": "MIT",
   "publishConfig": {
     "access": "public",
@@ -17,7 +17,7 @@
   },
   "repository": {
     "type": "git",
-    "url": "https://github.com/hyperweb-io/makage"
+    "url": "https://github.com/constructive-io/makage"
   },
   "keywords": [
     "build",
@@ -29,7 +29,7 @@
     "package-management"
   ],
   "bugs": {
-    "url": "https://github.com/hyperweb-io/makage/issues"
+    "url": "https://github.com/constructive-io/makage/issues"
   },
   "dependencies": {
     "glob": "^11.0.0",

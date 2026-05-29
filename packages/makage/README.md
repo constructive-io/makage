@@ -1,14 +1,14 @@
 # makage
 
 <p align="center">
-  <img src="https://raw.githubusercontent.com/hyperweb-io/makage/refs/heads/main/docs/img/logo.svg" width="80">
+  <img src="https://raw.githubusercontent.com/constructive-io/makage/refs/heads/main/docs/img/logo.svg" width="80">
   <br />
   Tiny build helper for monorepo packages
   <br />
-  <a href="https://github.com/hyperweb-io/makage/actions/workflows/ci.yml">
-    <img height="20" src="https://github.com/hyperweb-io/makage/actions/workflows/ci.yml/badge.svg" />
+  <a href="https://github.com/constructive-io/makage/actions/workflows/ci.yml">
+    <img height="20" src="https://github.com/constructive-io/makage/actions/workflows/ci.yml/badge.svg" />
   </a>
-  <a href="https://github.com/hyperweb-io/makage/blob/main/LICENSE">
+  <a href="https://github.com/constructive-io/makage/blob/main/LICENSE">
     <img height="20" src="https://img.shields.io/badge/license-MIT-blue.svg"/>
   </a>
 </p>
@@ -248,6 +248,38 @@ This will:
 3. Update all dependencies, devDependencies, peerDependencies, and optionalDependencies
 4. Convert version numbers to `workspace:*` for internal packages
 
+### `makage update-deps --from <source> --in <target>`
+
+Detects outdated cross-repo dependencies by comparing a source pnpm workspace against a target repo. Outputs structured JSON to stdout for CI integration.
+
+```bash
+makage update-deps --from ./constructive --in .
+```
+
+| Flag | Description |
+|------|-------------|
+| `--from` | Path to the source pnpm workspace (must contain `pnpm-workspace.yaml`) |
+| `--in` | Path to the target repo to scan for outdated deps |
+
+**How it works:**
+1. Reads `pnpm-workspace.yaml` from the source to discover all published packages and their versions
+2. Scans all `package.json` files in the target repo (workspace-aware or recursive scan)
+3. Cross-references `dependencies`, `devDependencies`, `peerDependencies`, and `optionalDependencies`
+4. Compares version strings (strips `^`/`~` prefixes) to determine what's outdated
+5. Outputs a JSON result with `sourcePackages`, `matchedPackages`, `outdatedPackages`, and `has_dep_changes`
+
+**Output format:**
+```json
+{
+  "sourcePackages": [{ "name": "@constructive/foo", "version": "1.2.3", "path": "packages/foo" }],
+  "matchedPackages": [{ "name": "@constructive/foo", "currentVersion": "^1.1.0", "availableVersion": "1.2.3", "depType": "dependencies", "consumer": "@myapp/bar", "outdated": true }],
+  "outdatedPackages": [/* subset where outdated=true */],
+  "has_dep_changes": true
+}
+```
+
+This command powers the [constructive-hub update-constructive-deps workflow](https://github.com/constructive-io/constructive-hub/blob/main/.github/workflows/update-constructive-deps.yml) which automatically creates PRs in downstream repos when the constructive workspace publishes new package versions.
+
 ## Why makage?
 
 Most monorepo packages need the same basic build operations:
@@ -264,7 +296,7 @@ Instead of installing multiple dependencies (`cpy`, `rimraf`, etc.) in every pac
 1. Clone the repository:
 
 ```bash
-git clone https://github.com/hyperweb-io/makage.git
+git clone https://github.com/constructive-io/makage.git
 ```
 
 2. Install dependencies:
@@ -285,7 +317,7 @@ pnpm test:watch
 ## Credits
 
 Built for developers, with developers.  
-👉 https://launchql.com | https://hyperweb.io
+👉 https://constructive.io
 
 ## Disclaimer
 
