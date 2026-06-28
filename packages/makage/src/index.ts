@@ -6,4 +6,5 @@ export { runBuild } from './commands/build';
 export { runBuildTs } from './commands/buildTs';
 export { runUpdateWorkspace } from './commands/updateWorkspace';
 export { runUpdateDeps } from './commands/updateDeps';
+export { runCheckPublish, findWorkspaceLeaks } from './commands/checkPublish';
 export { findWorkspaceRoot, findRootFile } from './commands/workspace';
