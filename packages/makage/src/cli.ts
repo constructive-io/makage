@@ -7,6 +7,7 @@ import { runBuild } from './commands/build';
 import { runBuildTs } from './commands/buildTs';
 import { runUpdateWorkspace } from './commands/updateWorkspace';
 import { runUpdateDeps } from './commands/updateDeps';
+import { runCheckPublish } from './commands/checkPublish';
 
 const [, , cmd, ...rest] = process.argv;
 
@@ -37,6 +38,9 @@ async function main() {
       case 'update-deps':
         await runUpdateDeps(rest);
         break;
+      case 'check-publish':
+        await runCheckPublish(rest);
+        break;
       case '-h':
       case '--help':
       default:
@@ -62,6 +66,7 @@ Usage:
   makage build-ts [--dev]
   makage update-workspace
   makage update-deps --from <source-workspace> --in <target-repo>
+  makage check-publish [path]       (check dist/package.json for workspace: leaks)
 `);
 }
 
