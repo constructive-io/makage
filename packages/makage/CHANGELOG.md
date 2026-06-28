@@ -3,6 +3,12 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+# [0.4.0](https://github.com/constructive-io/makage/compare/makage@0.3.1...makage@0.4.0) (2026-06-28)
+
+### Features
+
+- add check-publish command to detect workspace: protocol leaks ([616f8e1](https://github.com/constructive-io/makage/commit/616f8e1277bf6de249ff0e0b810375b1f4323bbc))
+
 ## [0.3.1](https://github.com/constructive-io/makage/compare/makage@0.3.0...makage@0.3.1) (2026-05-29)
 
 **Note:** Version bump only for package makage
