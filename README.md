@@ -153,7 +153,7 @@ makage update-deps --from ./constructive --in .
 
 ## Cross-Repo Dependency Updates (`update-deps`)
 
-The `update-deps` command enables deterministic, version-aware dependency synchronization across repositories. It is the engine behind the [constructive-hub update-constructive-deps workflow](https://github.com/constructive-io/constructive-hub/blob/main/.github/workflows/update-constructive-deps.yml).
+The `update-deps` command enables deterministic, version-aware dependency synchronization across repositories. It supports automated dependency updates in downstream repositories.
 
 ### How it works
 
@@ -201,7 +201,7 @@ Target repos are categorized into two strategies:
 
 ### Supported target repos
 
-The constructive-hub workflow currently updates:
+The workflow currently updates:
 - `constructive-db` (default, also triggers schema propagation)
 - `dashboard`
 - `pgpm-modules`

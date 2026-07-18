@@ -278,7 +278,7 @@ makage update-deps --from ./constructive --in .
 }
 ```
 
-This command powers the [constructive-hub update-constructive-deps workflow](https://github.com/constructive-io/constructive-hub/blob/main/.github/workflows/update-constructive-deps.yml) which automatically creates PRs in downstream repos when the constructive workspace publishes new package versions.
+This command supports automated dependency updates in downstream repos when the source workspace publishes new package versions.
 
 ## Why makage?
 
