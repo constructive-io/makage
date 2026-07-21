@@ -1,5 +1,6 @@
 import fs from 'node:fs/promises';
 import path from 'node:path';
+
 import { glob } from 'glob';
 import { parse as parseYaml } from 'yaml';
 
@@ -26,6 +27,7 @@ interface MatchedDep {
   availableVersion: string;
   depType: string;
   consumer: string;
+  file: string;
   outdated: boolean;
 }
 
@@ -33,18 +35,23 @@ interface UpdateDepsResult {
   sourcePackages: WorkspacePackage[];
   matchedPackages: MatchedDep[];
   outdatedPackages: MatchedDep[];
+  updatedFiles: string[];
+  dry_run: boolean;
   has_dep_changes: boolean;
 }
 
-function parseArgs(args: string[]): { from: string; in: string } {
+function parseArgs(args: string[]): { from: string; in: string; dryRun: boolean } {
   let from = '';
   let targetIn = '';
+  let dryRun = false;
 
   for (let i = 0; i < args.length; i++) {
     if (args[i] === '--from' && args[i + 1]) {
       from = args[++i];
     } else if (args[i] === '--in' && args[i + 1]) {
       targetIn = args[++i];
+    } else if (args[i] === '--dry-run' || args[i] === '--check') {
+      dryRun = true;
     }
   }
 
@@ -55,7 +62,7 @@ function parseArgs(args: string[]): { from: string; in: string } {
     throw new Error('Missing required argument: --in <path-to-target-repo>');
   }
 
-  return { from, in: targetIn };
+  return { from, in: targetIn, dryRun };
 }
 
 async function getWorkspacePackages(workspaceRoot: string): Promise<WorkspacePackage[]> {
@@ -127,6 +134,16 @@ function isOutdated(currentSpec: string, availableVersion: string): boolean {
   return false;
 }
 
+function detectIndent(content: string): string {
+  const match = content.match(/^(\s+)"/m);
+  return match ? match[1] : '  ';
+}
+
+function applyVersionPrefix(currentSpec: string, newVersion: string): string {
+  const prefix = currentSpec.match(/^[\^~>=<]*/)?.[0] ?? '';
+  return `${prefix}${newVersion}`;
+}
+
 async function getTargetPackageFiles(targetRoot: string): Promise<string[]> {
   // Check if target has pnpm-workspace.yaml (monorepo)
   const workspaceFile = path.join(targetRoot, 'pnpm-workspace.yaml');
@@ -180,6 +197,7 @@ export async function runUpdateDeps(args: string[]): Promise<UpdateDepsResult> {
   // Step 2: Scan target repo's package.json files
   const targetFiles = await getTargetPackageFiles(targetRoot);
   const matchedPackages: MatchedDep[] = [];
+  const updatedFiles: string[] = [];
 
   for (const file of targetFiles) {
     const pkgPath = path.join(targetRoot, file);
@@ -191,6 +209,7 @@ export async function runUpdateDeps(args: string[]): Promise<UpdateDepsResult> {
     }
     const pkg = JSON.parse(content);
     const consumer = pkg.name || file;
+    let fileChanged = false;
 
     for (const depType of DEPENDENCY_TYPES) {
       if (!pkg[depType]) continue;
@@ -206,9 +225,23 @@ export async function runUpdateDeps(args: string[]): Promise<UpdateDepsResult> {
           availableVersion: source.version,
           depType,
           consumer,
+          file,
           outdated
         });
+
+        if (outdated && !opts.dryRun) {
+          pkg[depType][depName] = applyVersionPrefix(currentVersion, source.version);
+          fileChanged = true;
+        }
       }
+    }
+
+    if (fileChanged) {
+      const indent = detectIndent(content);
+      const trailingNewline = content.endsWith('\n') ? '\n' : '';
+      await fs.writeFile(pkgPath, JSON.stringify(pkg, null, indent) + trailingNewline);
+      updatedFiles.push(file);
+      console.error(`[makage] Updated ${file}`);
     }
   }
 
@@ -218,13 +251,18 @@ export async function runUpdateDeps(args: string[]): Promise<UpdateDepsResult> {
     sourcePackages,
     matchedPackages,
     outdatedPackages,
+    updatedFiles,
+    dry_run: opts.dryRun,
     has_dep_changes: outdatedPackages.length > 0
   };
 
   // Output structured JSON to stdout (logs go to stderr)
   console.log(JSON.stringify(result, null, 2));
 
-  console.error(`[makage] ${matchedPackages.length} matched, ${outdatedPackages.length} outdated`);
+  console.error(
+    `[makage] ${matchedPackages.length} matched, ${outdatedPackages.length} outdated` +
+      (opts.dryRun ? ' (dry run — no files written)' : `, ${updatedFiles.length} file(s) updated`)
+  );
 
   return result;
 }

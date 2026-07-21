@@ -1,5 +1,7 @@
 import fs from 'node:fs/promises';
+
 import { glob } from 'glob';
+
 import { runUpdateDeps } from '../src/commands/updateDeps';
 
 jest.mock('node:fs/promises');
@@ -248,5 +250,96 @@ describe('runUpdateDeps', () => {
     expect(result.matchedPackages).toHaveLength(1);
     expect(result.matchedPackages[0].outdated).toBe(false);
     expect(result.has_dep_changes).toBe(false);
+    expect(result.updatedFiles).toHaveLength(0);
+    expect(mockedFs.writeFile).not.toHaveBeenCalled();
+  });
+
+  it('should write updated package.json files by default, preserving version prefixes', async () => {
+    mockedFs.readFile.mockImplementation(async (filePath: any) => {
+      const p = filePath.toString();
+      if (p.endsWith('pnpm-workspace.yaml') && p.includes('source')) {
+        return WORKSPACE_YAML;
+      }
+      if (p.endsWith('pnpm-workspace.yaml') && p.includes('target')) {
+        throw new Error('ENOENT');
+      }
+      if (p.includes('source') && p.includes('packages/foo/package.json')) {
+        return makePkg('@scope/foo', '2.0.0');
+      }
+      if (p.includes('source') && p.includes('graphile/bar/package.json')) {
+        return makePkg('graphile-bar', '1.5.0');
+      }
+      if (p.includes('target') && p.endsWith('package.json')) {
+        return JSON.stringify(
+          {
+            name: 'target',
+            version: '1.0.0',
+            dependencies: { '@scope/foo': '^1.0.0', 'graphile-bar': '~1.5.0' }
+          },
+          null,
+          2
+        ) + '\n';
+      }
+      throw new Error(`ENOENT: ${p}`);
+    });
+
+    mockedGlob.mockImplementation(async (patterns: any, opts: any) => {
+      const cwd = opts?.cwd || '';
+      if (cwd.includes('source')) {
+        return ['packages/foo/package.json', 'graphile/bar/package.json'];
+      }
+      return [];
+    });
+
+    const result = await runUpdateDeps(['--from', '/source', '--in', '/target']);
+
+    expect(result.dry_run).toBe(false);
+    expect(result.updatedFiles).toEqual(['package.json']);
+    expect(mockedFs.writeFile).toHaveBeenCalledTimes(1);
+
+    const written = mockedFs.writeFile.mock.calls[0][1] as string;
+    const writtenPkg = JSON.parse(written);
+    // outdated dep bumped, prefix preserved
+    expect(writtenPkg.dependencies['@scope/foo']).toBe('^2.0.0');
+    // up-to-date dep untouched
+    expect(writtenPkg.dependencies['graphile-bar']).toBe('~1.5.0');
+    // formatting preserved (2-space indent + trailing newline)
+    expect(written.endsWith('\n')).toBe(true);
+    expect(written).toContain('  "name"');
+  });
+
+  it('should not write files with --dry-run', async () => {
+    mockedFs.readFile.mockImplementation(async (filePath: any) => {
+      const p = filePath.toString();
+      if (p.endsWith('pnpm-workspace.yaml') && p.includes('source')) {
+        return WORKSPACE_YAML;
+      }
+      if (p.endsWith('pnpm-workspace.yaml') && p.includes('target')) {
+        throw new Error('ENOENT');
+      }
+      if (p.includes('source') && p.includes('packages/foo/package.json')) {
+        return makePkg('@scope/foo', '2.0.0');
+      }
+      if (p.includes('target') && p.endsWith('package.json')) {
+        return makePkg('target', '1.0.0', { '@scope/foo': '^1.0.0' });
+      }
+      throw new Error(`ENOENT: ${p}`);
+    });
+
+    mockedGlob.mockImplementation(async (patterns: any, opts: any) => {
+      const cwd = opts?.cwd || '';
+      if (cwd.includes('source')) {
+        return ['packages/foo/package.json'];
+      }
+      return [];
+    });
+
+    const result = await runUpdateDeps(['--from', '/source', '--in', '/target', '--dry-run']);
+
+    expect(result.dry_run).toBe(true);
+    expect(result.has_dep_changes).toBe(true);
+    expect(result.outdatedPackages).toHaveLength(1);
+    expect(result.updatedFiles).toHaveLength(0);
+    expect(mockedFs.writeFile).not.toHaveBeenCalled();
   });
 });
