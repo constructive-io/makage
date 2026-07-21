@@ -3,6 +3,12 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+# [0.5.0](https://github.com/constructive-io/makage/compare/makage@0.4.0...makage@0.5.0) (2026-07-21)
+
+### Features
+
+- **update-deps:** apply dependency updates to package.json by default ([eacc922](https://github.com/constructive-io/makage/commit/eacc9223e2a7663e932f702795705ff03c2601dc))
+
 # [0.4.0](https://github.com/constructive-io/makage/compare/makage@0.3.1...makage@0.4.0) (2026-06-28)
 
 ### Features
