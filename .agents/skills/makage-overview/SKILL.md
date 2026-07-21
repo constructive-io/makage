@@ -21,7 +21,7 @@ Tiny, zero-dependency build helper for monorepo packages. Replaces `cpy`, `rimra
 | `makage assets` | Copy LICENSE + package.json + README+FOOTER to dist |
 | `makage readme-footer --source <f> --footer <f> --dest <f>` | Concatenate README with footer |
 | `makage update-workspace` | Convert internal deps to `workspace:*` protocol |
-| `makage update-deps --from <source> --in <target>` | Cross-repo dependency detection (JSON output) |
+| `makage update-deps --from <source> --in <target> [--dry-run]` | Cross-repo dependency update: rewrites outdated `package.json` specs in place (JSON output); `--dry-run` detects only |
 
 ## Cross-Repo Dependency Updates (`update-deps`)
 
@@ -32,7 +32,7 @@ Deterministic, version-aware dependency synchronization across repositories. Thi
 ### Usage
 
 ```bash
-makage update-deps --from <path-to-source-workspace> --in <path-to-target-repo>
+makage update-deps --from <path-to-source-workspace> --in <path-to-target-repo> [--dry-run]
 ```
 
 ### Algorithm
@@ -42,7 +42,8 @@ makage update-deps --from <path-to-source-workspace> --in <path-to-target-repo>
 3. Cross-references dependencies/devDependencies/peerDependencies/optionalDependencies
 4. Strips `^`/`~`/`>=` prefixes and compares semver parts numerically
 5. Skips `workspace:` protocol deps (always in sync)
-6. Outputs structured JSON to stdout; logs to stderr
+6. Rewrites outdated specs in the target `package.json` files in place, preserving `^`/`~` prefixes and formatting (skipped with `--dry-run`/`--check`)
+7. Outputs structured JSON to stdout; logs to stderr
 
 ### JSON Output Schema
 
@@ -58,6 +59,8 @@ makage update-deps --from <path-to-source-workspace> --in <path-to-target-repo>
     "outdated": "boolean"
   }],
   "outdatedPackages": [/* subset of matchedPackages where outdated=true */],
+  "updatedFiles": ["string — package.json paths rewritten (empty in dry-run)"],
+  "dry_run": "boolean",
   "has_dep_changes": "boolean"
 }
 ```

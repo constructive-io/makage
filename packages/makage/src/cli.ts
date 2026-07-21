@@ -65,7 +65,7 @@ Usage:
   makage assets
   makage build-ts [--dev]
   makage update-workspace
-  makage update-deps --from <source-workspace> --in <target-repo>
+  makage update-deps --from <source-workspace> --in <target-repo> [--dry-run]
   makage check-publish [path]       (check dist/package.json for workspace: leaks)
 `);
 }

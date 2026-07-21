@@ -248,25 +248,28 @@ This will:
 3. Update all dependencies, devDependencies, peerDependencies, and optionalDependencies
 4. Convert version numbers to `workspace:*` for internal packages
 
-### `makage update-deps --from <source> --in <target>`
+### `makage update-deps --from <source> --in <target> [--dry-run]`
 
-Detects outdated cross-repo dependencies by comparing a source pnpm workspace against a target repo. Outputs structured JSON to stdout for CI integration.
+Updates outdated cross-repo dependencies by comparing a source pnpm workspace against a target repo, rewriting the target's `package.json` files in place. Outputs structured JSON to stdout for CI integration. Use `--dry-run` to detect without writing.
 
 ```bash
 makage update-deps --from ./constructive --in .
+makage update-deps --from ./constructive --in . --dry-run
 ```
 
 | Flag | Description |
 |------|-------------|
 | `--from` | Path to the source pnpm workspace (must contain `pnpm-workspace.yaml`) |
 | `--in` | Path to the target repo to scan for outdated deps |
+| `--dry-run` | Detect only — do not write any files (alias: `--check`) |
 
 **How it works:**
 1. Reads `pnpm-workspace.yaml` from the source to discover all published packages and their versions
 2. Scans all `package.json` files in the target repo (workspace-aware or recursive scan)
 3. Cross-references `dependencies`, `devDependencies`, `peerDependencies`, and `optionalDependencies`
 4. Compares version strings (strips `^`/`~` prefixes) to determine what's outdated
-5. Outputs a JSON result with `sourcePackages`, `matchedPackages`, `outdatedPackages`, and `has_dep_changes`
+5. Rewrites outdated version specs in place, preserving `^`/`~` prefixes and file formatting; `workspace:` deps are left untouched (skipped with `--dry-run`)
+6. Outputs a JSON result with `sourcePackages`, `matchedPackages`, `outdatedPackages`, `updatedFiles`, `dry_run`, and `has_dep_changes`
 
 **Output format:**
 ```json
@@ -274,6 +277,8 @@ makage update-deps --from ./constructive --in .
   "sourcePackages": [{ "name": "@constructive/foo", "version": "1.2.3", "path": "packages/foo" }],
   "matchedPackages": [{ "name": "@constructive/foo", "currentVersion": "^1.1.0", "availableVersion": "1.2.3", "depType": "dependencies", "consumer": "@myapp/bar", "outdated": true }],
   "outdatedPackages": [/* subset where outdated=true */],
+  "updatedFiles": ["application/bar/package.json"],
+  "dry_run": false,
   "has_dep_changes": true
 }
 ```

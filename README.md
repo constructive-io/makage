@@ -147,13 +147,16 @@ makage readme-footer --source README.md --footer FOOTER.md --dest dist/README.md
 # Update workspace dependencies
 makage update-workspace
 
-# Detect outdated cross-repo dependencies (structured JSON output)
+# Update outdated cross-repo dependencies (structured JSON output)
 makage update-deps --from ./constructive --in .
+
+# Detect only, without writing any files
+makage update-deps --from ./constructive --in . --dry-run
 ```
 
 ## Cross-Repo Dependency Updates (`update-deps`)
 
-The `update-deps` command enables deterministic, version-aware dependency synchronization across repositories. It supports automated dependency updates in downstream repositories.
+The `update-deps` command enables deterministic, version-aware dependency synchronization across repositories. It detects outdated packages **and updates the target repo's `package.json` files in place** (use `--dry-run` for detection only).
 
 ### How it works
 
@@ -161,18 +164,20 @@ The `update-deps` command enables deterministic, version-aware dependency synchr
 2. **Scans** the target repo's `package.json` files (supports both monorepo and non-workspace layouts)
 3. **Cross-references** dependencies to find packages that exist in both source and target
 4. **Compares versions** using semver to identify outdated packages
-5. **Outputs structured JSON** to stdout for CI consumption (logs go to stderr)
+5. **Rewrites** outdated version specs in the target `package.json` files, preserving `^`/`~` prefixes and skipping `workspace:` deps (unless `--dry-run`)
+6. **Outputs structured JSON** to stdout for CI consumption (logs go to stderr)
 
 ### Usage
 
 ```bash
-makage update-deps --from <source-workspace> --in <target-repo>
+makage update-deps --from <source-workspace> --in <target-repo> [--dry-run]
 ```
 
 | Flag | Description |
 |------|-------------|
 | `--from` | Path to the source pnpm workspace (contains `pnpm-workspace.yaml`) |
 | `--in` | Path to the target repo to scan for outdated deps |
+| `--dry-run` | Detect only — report outdated deps without writing any files (alias: `--check`) |
 
 ### Output format
 
@@ -181,6 +186,8 @@ makage update-deps --from <source-workspace> --in <target-repo>
   "sourcePackages": [{ "name": "@constructive/foo", "version": "1.2.3", "path": "packages/foo" }],
   "matchedPackages": [{ "name": "@constructive/foo", "currentVersion": "^1.1.0", "availableVersion": "1.2.3", "depType": "dependencies", "consumer": "@myapp/bar", "outdated": true }],
   "outdatedPackages": [/* subset of matchedPackages where outdated=true */],
+  "updatedFiles": ["application/bar/package.json"],
+  "dry_run": false,
   "has_dep_changes": true
 }
 ```
@@ -190,14 +197,9 @@ makage update-deps --from <source-workspace> --in <target-repo>
 The `update-deps` command is used in GitHub Actions to automatically update downstream repos when the source workspace publishes new versions. The typical CI flow:
 
 1. Check out the target repo + source workspace side by side
-2. Run `makage update-deps --from ./constructive --in .` for structured JSON detection
-3. Parse the JSON output to extract outdated package names
-4. Run `pnpm update -r --latest <packages...>` to update them
-5. Create a PR with the results
-
-Target repos are categorized into two strategies:
-- **Workspace repos** (have `pnpm-workspace.yaml`): Use `pnpm update -r --latest` for bulk updates
-- **Non-workspace repos** (e.g., template repos): Update each `package.json` individually via `jq` or per-directory `pnpm update`
+2. Run `makage update-deps --from ./constructive --in .` — this updates the target's `package.json` files and emits structured JSON
+3. Run `pnpm install --no-frozen-lockfile` (workspace repos) or per-directory `pnpm install` to sync lockfiles
+4. Create a PR with the results
 
 ### Supported target repos
 
