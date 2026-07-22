@@ -3,6 +3,12 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+## [0.5.1](https://github.com/constructive-io/makage/compare/makage@0.5.0...makage@0.5.1) (2026-07-22)
+
+### Bug Fixes
+
+- **update-deps:** pick highest version when source workspace has duplicate package names ([ad971ea](https://github.com/constructive-io/makage/commit/ad971ea9f601375b4ece2b6f4e43f345f67b926d))
+
 # [0.5.0](https://github.com/constructive-io/makage/compare/makage@0.4.0...makage@0.5.0) (2026-07-21)
 
 ### Features
