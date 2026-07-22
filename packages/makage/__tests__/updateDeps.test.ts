@@ -342,4 +342,43 @@ describe('runUpdateDeps', () => {
     expect(result.updatedFiles).toHaveLength(0);
     expect(mockedFs.writeFile).not.toHaveBeenCalled();
   });
+
+  it('should pick the highest version when source workspace contains duplicate package names', async () => {
+    mockedFs.readFile.mockImplementation(async (filePath: any) => {
+      const p = filePath.toString();
+      if (p.endsWith('pnpm-workspace.yaml') && p.includes('source')) {
+        return `packages:\n  - 'packages/*'\n  - 'packages/*/versions/*'\n`;
+      }
+      if (p.endsWith('pnpm-workspace.yaml') && p.includes('target')) {
+        throw new Error('ENOENT');
+      }
+      if (p.includes('source') && p.includes('packages/foo/package.json')) {
+        return makePkg('@scope/foo', '2.0.0');
+      }
+      if (p.includes('source') && p.includes('packages/foo/versions/1/package.json')) {
+        return makePkg('@scope/foo', '1.9.0');
+      }
+      if (p.includes('target') && p.endsWith('package.json')) {
+        return makePkg('target', '1.0.0', { '@scope/foo': '^1.0.0' });
+      }
+      throw new Error(`ENOENT: ${p}`);
+    });
+
+    mockedGlob.mockImplementation(async (patterns: any, opts: any) => {
+      const cwd = opts?.cwd || '';
+      if (cwd.includes('source')) {
+        // Deliberately return the lower version last, which previously would
+        // overwrite the sourceMap and produce availableVersion: 1.9.0.
+        return ['packages/foo/package.json', 'packages/foo/versions/1/package.json'];
+      }
+      return [];
+    });
+
+    const result = await runUpdateDeps(['--from', '/source', '--in', '/target', '--dry-run']);
+
+    const fooMatch = result.matchedPackages.find(p => p.name === '@scope/foo');
+    expect(fooMatch?.availableVersion).toBe('2.0.0');
+    expect(fooMatch?.outdated).toBe(true);
+    expect(result.has_dep_changes).toBe(true);
+  });
 });
