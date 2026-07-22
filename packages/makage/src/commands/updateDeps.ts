@@ -113,6 +113,20 @@ function stripVersionPrefix(version: string): string {
   return version.replace(/^[\^~>=<]*/, '');
 }
 
+function compareSemver(a: string, b: string): number {
+  const aParts = a.split('.').map(Number);
+  const bParts = b.split('.').map(Number);
+
+  for (let i = 0; i < 3; i++) {
+    const av = aParts[i] || 0;
+    const bv = bParts[i] || 0;
+    if (av > bv) return 1;
+    if (av < bv) return -1;
+  }
+
+  return 0;
+}
+
 function isOutdated(currentSpec: string, availableVersion: string): boolean {
   // workspace: protocol means it's managed by pnpm workspace — always in sync
   if (currentSpec.startsWith('workspace:')) return false;
@@ -120,18 +134,7 @@ function isOutdated(currentSpec: string, availableVersion: string): boolean {
   const current = stripVersionPrefix(currentSpec);
   if (!current || current === '*') return false;
 
-  // Simple semver comparison: split and compare parts
-  const currentParts = current.split('.').map(Number);
-  const availableParts = availableVersion.split('.').map(Number);
-
-  for (let i = 0; i < 3; i++) {
-    const c = currentParts[i] || 0;
-    const a = availableParts[i] || 0;
-    if (a > c) return true;
-    if (a < c) return false;
-  }
-
-  return false;
+  return compareSemver(availableVersion, current) > 0;
 }
 
 function detectIndent(content: string): string {
@@ -190,7 +193,17 @@ export async function runUpdateDeps(args: string[]): Promise<UpdateDepsResult> {
 
   // Step 1: Get all packages from source workspace
   const sourcePackages = await getWorkspacePackages(fromRoot);
-  const sourceMap = new Map(sourcePackages.map(p => [p.name, p]));
+
+  // A source workspace may contain multiple versions of the same package
+  // (e.g. versioned subdirectories). Pick the highest version as the source
+  // of truth for dependency updates.
+  const sourceMap = new Map<string, WorkspacePackage>();
+  for (const pkg of sourcePackages) {
+    const existing = sourceMap.get(pkg.name);
+    if (!existing || compareSemver(pkg.version, existing.version) > 0) {
+      sourceMap.set(pkg.name, pkg);
+    }
+  }
 
   console.error(`[makage] Found ${sourcePackages.length} packages in source workspace`);
 
