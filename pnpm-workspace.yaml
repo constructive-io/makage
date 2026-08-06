@@ -1,2 +1,29 @@
 packages:
   - 'packages/*'
+
+# Exempt from the wait: 6 scope glob(s), 3 first-party package(s).
+# First-party membership comes from what pyramation publishes on npm — waiting on your own release protects nothing.
+minimumReleaseAgeExclude:
+  - "@constructive-db/*"
+  - "@constructive-io/*"
+  - "@launchql/*"
+  - "@pgpm/*"
+  - "@pgpmjs/*"
+  - "@pgsql/*"
+  - nested-obj
+  - pnpm-policy
+  - yamlize
+
+# Managed by pnpm-policy — run `pnpm-policy generate` after editing pnpm-policy.yaml.
+
+# A third-party release must be 2d old before it can be installed.
+# Most malicious releases are found and yanked well inside that window.
+minimumReleaseAge: 2880
+
+# Transitive dependencies must come from the registry, not from git or a URL.
+blockExoticSubdeps: true
+
+# The only dependencies permitted to run install scripts.
+onlyBuiltDependencies:
+  - nx # postinstall (bin/post-install) downloads/links the native platform binary that powers Nx's task graph runner; without it nx falls back to a broken install.
+  - unrs-resolver # postinstall runs napi-postinstall to fetch the native (napi-rs) resolver binary used by eslint's TypeScript import resolver during lint.
