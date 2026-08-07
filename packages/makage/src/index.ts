@@ -5,6 +5,7 @@ export { runAssets } from './commands/assets';
 export { runBuild } from './commands/build';
 export { runBuildTs } from './commands/buildTs';
 export { runUpdateWorkspace } from './commands/updateWorkspace';
-export { runUpdateDeps } from './commands/updateDeps';
+export { runUpdateDeps, updateDeps } from './commands/updateDeps';
+export { runDeps } from './commands/deps';
 export { runCheckPublish, findWorkspaceLeaks } from './commands/checkPublish';
 export { findWorkspaceRoot, findRootFile } from './commands/workspace';

@@ -152,7 +152,47 @@ makage update-deps --from ./constructive --in .
 
 # Detect only, without writing any files
 makage update-deps --from ./constructive --in . --dry-run
+
+# Update this workspace from sibling repos checked out next to it
+makage deps constructive
+makage deps constructive pgsql-parser --install
+makage deps --all --dry-run
+makage deps --list
 ```
+
+## Sibling Repo Dependency Updates (`deps`)
+
+`makage deps` is the local, day-to-day front end for [`update-deps`](#cross-repo-dependency-updates-update-deps). It assumes all your repos are siblings on disk, so a bare name like `constructive` resolves to `../constructive` relative to the current workspace root — no `--from`/`--in` paths to type.
+
+```bash
+makage deps <sibling-repo...> [--all] [--list] [--dry-run] [--install] [--json] [--in <target>]
+```
+
+| Flag | Description |
+|------|-------------|
+| `--all` | Update from every sibling directory that is a pnpm workspace |
+| `--list` | List sibling workspaces and exit |
+| `--dry-run` | Report outdated deps without writing files (alias: `--check`) |
+| `--install` | Run `pnpm install` in the target workspace when something changed |
+| `--json` | Emit the structured summary on stdout (logs stay on stderr) |
+| `--in` | Target workspace to update (defaults to the workspace root above `cwd`) |
+
+Names containing a path separator (or starting with `.` / `/`) are treated as paths instead of sibling names, so `makage deps ../../other/repo` works too.
+
+Wire it up as per-repo scripts:
+
+```json
+{
+  "scripts": {
+    "deps": "pnpm up -r -i -L",
+    "deps:constructive": "makage deps constructive",
+    "deps:pgsql-parser": "makage deps pgsql-parser",
+    "deps:siblings": "makage deps --all"
+  }
+}
+```
+
+Then from `constructive-db`, `pnpm deps:constructive` pulls the latest versions published by `../constructive` into every `package.json` in the repo.
 
 ## Cross-Repo Dependency Updates (`update-deps`)
 

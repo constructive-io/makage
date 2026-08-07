@@ -160,6 +160,10 @@ makage readme-footer --source README.md --footer FOOTER.md --dest dist/README.md
 
 # Update workspace dependencies
 makage update-workspace
+
+# Update this workspace from sibling repos checked out next to it
+makage deps constructive
+makage deps --all --dry-run
 ```
 
 ## Commands
@@ -284,6 +288,41 @@ makage update-deps --from ./constructive --in . --dry-run
 ```
 
 This command supports automated dependency updates in downstream repos when the source workspace publishes new package versions.
+
+### `makage deps <sibling-repo...> [--all] [--list] [--dry-run] [--install] [--json]`
+
+Local front end for `update-deps` that assumes all your repos are siblings on disk. A bare name resolves to `../<name>` relative to the current workspace root, so there are no `--from`/`--in` paths to type.
+
+```bash
+makage deps constructive                    # update from ../constructive
+makage deps constructive pgsql-parser       # update from several siblings
+makage deps --all --dry-run                 # preview updates from every sibling workspace
+makage deps constructive --install          # then run pnpm install if anything changed
+makage deps --list                          # list sibling workspaces
+```
+
+| Flag | Description |
+|------|-------------|
+| `--all` | Update from every sibling directory that is a pnpm workspace |
+| `--list` | List sibling workspaces and exit |
+| `--dry-run` | Detect only — do not write any files (alias: `--check`) |
+| `--install` | Run `pnpm install` in the target workspace when something changed |
+| `--json` | Emit the structured summary on stdout (logs stay on stderr) |
+| `--in` | Target workspace to update (defaults to the workspace root above `cwd`) |
+
+Names containing a path separator (or starting with `.` / `/`) are treated as paths, so `makage deps ../../other/repo` works too. Each sibling must contain a `pnpm-workspace.yaml`, otherwise the command fails loudly instead of silently skipping it.
+
+Recommended per-repo scripts:
+
+```json
+{
+  "scripts": {
+    "deps:constructive": "makage deps constructive",
+    "deps:pgsql-parser": "makage deps pgsql-parser",
+    "deps:siblings": "makage deps --all"
+  }
+}
+```
 
 ## Why makage?
 

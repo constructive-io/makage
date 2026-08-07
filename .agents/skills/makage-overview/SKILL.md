@@ -1,6 +1,6 @@
 ---
 name: makage-overview
-description: Reference for the makage CLI tool — build helper, asset management, workspace updates, and cross-repo dependency synchronization. Use when asked about makage commands, monorepo builds, update-deps, or cross-repo dependency workflows.
+description: Reference for the makage CLI tool — build helper, asset management, workspace updates, and cross-repo dependency synchronization. Use when asked about makage commands, monorepo builds, update-deps, sibling-repo deps, or cross-repo dependency workflows.
 ---
 
 # makage
@@ -22,6 +22,23 @@ Tiny, zero-dependency build helper for monorepo packages. Replaces `cpy`, `rimra
 | `makage readme-footer --source <f> --footer <f> --dest <f>` | Concatenate README with footer |
 | `makage update-workspace` | Convert internal deps to `workspace:*` protocol |
 | `makage update-deps --from <source> --in <target> [--dry-run]` | Cross-repo dependency update: rewrites outdated `package.json` specs in place (JSON output); `--dry-run` detects only |
+| `makage deps <sibling...> [--all] [--list] [--dry-run] [--install] [--json]` | Local sibling-repo front end for `update-deps`: `constructive` resolves to `../constructive` |
+
+## Sibling Repo Updates (`deps`)
+
+For local, day-to-day use where every repo is checked out as a sibling directory. `makage deps constructive` from `constructive-db` is equivalent to `makage update-deps --from ../constructive --in <workspace-root>`.
+
+```bash
+makage deps constructive pgsql-parser   # update from named siblings
+makage deps --all --dry-run             # preview updates from every sibling pnpm workspace
+makage deps constructive --install      # run pnpm install afterwards when something changed
+makage deps --list                      # list sibling workspaces
+```
+
+- Target defaults to the workspace root found above `cwd` (override with `--in`).
+- Bare names resolve as siblings; anything with a path separator or leading `.`/`/` is treated as a path.
+- A sibling without `pnpm-workspace.yaml` is an error, not a silent skip.
+- Recommended repo scripts: `"deps:constructive": "makage deps constructive"`, `"deps:siblings": "makage deps --all"`.
 
 ## Cross-Repo Dependency Updates (`update-deps`)
 
@@ -113,7 +130,8 @@ makage assumes the following structure:
 | Path | Purpose |
 |------|---------|
 | `packages/makage/src/cli.ts` | CLI entrypoint and command dispatch |
-| `packages/makage/src/commands/updateDeps.ts` | Cross-repo dependency detection logic |
+| `packages/makage/src/commands/updateDeps.ts` | Cross-repo dependency detection logic (`updateDeps` core + `--from/--in` CLI) |
+| `packages/makage/src/commands/deps.ts` | Sibling-repo resolution front end over `updateDeps` |
 | `packages/makage/src/commands/updateWorkspace.ts` | Workspace protocol updater |
 | `packages/makage/src/commands/build.ts` | Build orchestration |
 | `packages/makage/src/commands/copy.ts` | File copy with glob + flatten |
