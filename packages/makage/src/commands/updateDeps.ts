@@ -31,7 +31,14 @@ interface MatchedDep {
   outdated: boolean;
 }
 
-interface UpdateDepsResult {
+export interface UpdateDepsOptions {
+  from: string;
+  in: string;
+  dryRun?: boolean;
+  quiet?: boolean;
+}
+
+export interface UpdateDepsResult {
   sourcePackages: WorkspacePackage[];
   matchedPackages: MatchedDep[];
   outdatedPackages: MatchedDep[];
@@ -188,6 +195,18 @@ async function getTargetPackageFiles(targetRoot: string): Promise<string[]> {
 
 export async function runUpdateDeps(args: string[]): Promise<UpdateDepsResult> {
   const opts = parseArgs(args);
+  const result = await updateDeps(opts);
+
+  // Output structured JSON to stdout (logs go to stderr)
+  console.log(JSON.stringify(result, null, 2));
+
+  return result;
+}
+
+export async function updateDeps(opts: UpdateDepsOptions): Promise<UpdateDepsResult> {
+  const log = (msg: string) => {
+    if (!opts.quiet) console.error(msg);
+  };
   const fromRoot = path.resolve(opts.from);
   const targetRoot = path.resolve(opts.in);
 
@@ -205,7 +224,7 @@ export async function runUpdateDeps(args: string[]): Promise<UpdateDepsResult> {
     }
   }
 
-  console.error(`[makage] Found ${sourcePackages.length} packages in source workspace`);
+  log(`[makage] Found ${sourcePackages.length} packages in source workspace`);
 
   // Step 2: Scan target repo's package.json files
   const targetFiles = await getTargetPackageFiles(targetRoot);
@@ -254,7 +273,7 @@ export async function runUpdateDeps(args: string[]): Promise<UpdateDepsResult> {
       const trailingNewline = content.endsWith('\n') ? '\n' : '';
       await fs.writeFile(pkgPath, JSON.stringify(pkg, null, indent) + trailingNewline);
       updatedFiles.push(file);
-      console.error(`[makage] Updated ${file}`);
+      log(`[makage] Updated ${file}`);
     }
   }
 
@@ -265,14 +284,11 @@ export async function runUpdateDeps(args: string[]): Promise<UpdateDepsResult> {
     matchedPackages,
     outdatedPackages,
     updatedFiles,
-    dry_run: opts.dryRun,
+    dry_run: Boolean(opts.dryRun),
     has_dep_changes: outdatedPackages.length > 0
   };
 
-  // Output structured JSON to stdout (logs go to stderr)
-  console.log(JSON.stringify(result, null, 2));
-
-  console.error(
+  log(
     `[makage] ${matchedPackages.length} matched, ${outdatedPackages.length} outdated` +
       (opts.dryRun ? ' (dry run — no files written)' : `, ${updatedFiles.length} file(s) updated`)
   );
