@@ -3,6 +3,12 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+# [0.6.0](https://github.com/constructive-io/makage/compare/makage@0.5.1...makage@0.6.0) (2026-08-07)
+
+### Features
+
+- **deps:** sibling-repo dependency updates ([5bbad7b](https://github.com/constructive-io/makage/commit/5bbad7b24b36a4a1e7f96caa1f92c78a61ae6718))
+
 ## [0.5.1](https://github.com/constructive-io/makage/compare/makage@0.5.0...makage@0.5.1) (2026-07-22)
 
 ### Bug Fixes
