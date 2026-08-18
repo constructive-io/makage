@@ -1,7 +1,8 @@
 import fs from 'node:fs/promises';
 import path from 'node:path';
-import { glob } from 'glob';
 import { parse as parseYaml } from 'yaml';
+
+import { findWorkspacePackageFiles } from './workspacePatterns';
 
 const DEPENDENCY_TYPES = [
   'dependencies',
@@ -35,18 +36,7 @@ export async function runUpdateWorkspace(_args: string[]) {
   console.log(`[makage] Workspace patterns:`, patterns);
 
   // Find all package.json files matching the workspace patterns
-  const packageJsonPatterns = patterns.map(p => {
-    // Convert workspace pattern to package.json glob
-    // e.g., 'packages/*' -> 'packages/*/package.json'
-    const normalized = p.replace(/\/?\*\*?$/, '');
-    return `${normalized}/*/package.json`;
-  });
-
-  const packageFiles = await glob(packageJsonPatterns, {
-    cwd,
-    absolute: false,
-    ignore: ['**/node_modules/**']
-  });
+  const packageFiles = await findWorkspacePackageFiles(cwd, patterns);
 
   if (packageFiles.length === 0) {
     console.log('[makage] No packages found matching workspace patterns');
