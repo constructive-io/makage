@@ -3,6 +3,12 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+# [0.7.0](https://github.com/constructive-io/makage/compare/makage@0.6.0...makage@0.7.0) (2026-08-18)
+
+### Features
+
+- **update-deps:** resolve pnpm catalog specs and expand workspace patterns like pnpm ([6e1d906](https://github.com/constructive-io/makage/commit/6e1d9062f61bb4603b15ab4a9ccd90c9a46b75d7))
+
 # [0.6.0](https://github.com/constructive-io/makage/compare/makage@0.5.1...makage@0.6.0) (2026-08-07)
 
 ### Features
