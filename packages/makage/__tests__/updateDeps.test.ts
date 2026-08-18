@@ -343,6 +343,156 @@ describe('runUpdateDeps', () => {
     expect(mockedFs.writeFile).not.toHaveBeenCalled();
   });
 
+  describe('pnpm catalogs', () => {
+    const TARGET_WORKSPACE_YAML = `packages:
+  - 'packages/*'
+
+# one version per dependency, declared here
+catalog:
+  '@scope/foo': ^2.0.0
+
+catalogs:
+  legacy:
+    graphile-bar: ^1.0.0
+`;
+
+    function mockCatalogTarget(manifests: Record<string, string>) {
+      mockedFs.readFile.mockImplementation(async (filePath: any) => {
+        const p = filePath.toString();
+        if (p.endsWith('pnpm-workspace.yaml') && p.includes('source')) {
+          return WORKSPACE_YAML;
+        }
+        if (p.endsWith('pnpm-workspace.yaml') && p.includes('target')) {
+          return TARGET_WORKSPACE_YAML;
+        }
+        if (p.includes('source') && p.includes('packages/foo/package.json')) {
+          return makePkg('@scope/foo', '3.0.0');
+        }
+        if (p.includes('source') && p.includes('graphile/bar/package.json')) {
+          return makePkg('graphile-bar', '2.0.0');
+        }
+        for (const [file, contents] of Object.entries(manifests)) {
+          if (p.endsWith(`target/${file}`)) return contents;
+        }
+        throw new Error(`ENOENT: ${p}`);
+      });
+
+      mockedGlob.mockImplementation(async (patterns: any, opts: any) => {
+        const cwd = opts?.cwd || '';
+        if (cwd.includes('source')) {
+          return ['packages/foo/package.json', 'graphile/bar/package.json'];
+        }
+        return Object.keys(manifests).filter(f => f !== 'package.json');
+      });
+    }
+
+    const writtenFile = (suffix: string) =>
+      mockedFs.writeFile.mock.calls.find(call => call[0].toString().endsWith(suffix))?.[1] as string | undefined;
+
+    it('bumps the catalog entry in pnpm-workspace.yaml, once, for all consumers', async () => {
+      mockCatalogTarget({
+        'package.json': makePkg('target-root', '1.0.0'),
+        'packages/one/package.json': makePkg('one', '1.0.0', { '@scope/foo': 'catalog:' }),
+        'packages/two/package.json': makePkg('two', '1.0.0', { '@scope/foo': 'catalog:default' })
+      });
+
+      const result = await runUpdateDeps(['--from', '/source', '--in', '/target']);
+
+      // deduped: one report for the catalog entry, not one per consumer
+      const fooMatches = result.matchedPackages.filter(p => p.name === '@scope/foo');
+      expect(fooMatches).toHaveLength(1);
+      expect(fooMatches[0]).toMatchObject({
+        currentVersion: '^2.0.0',
+        availableVersion: '3.0.0',
+        outdated: true,
+        catalog: 'default',
+        file: 'pnpm-workspace.yaml'
+      });
+
+      expect(result.updatedFiles).toEqual(['pnpm-workspace.yaml']);
+      const yaml = writtenFile('pnpm-workspace.yaml') as string;
+      expect(yaml).toContain(`'@scope/foo': ^3.0.0`);
+      expect(yaml).toContain('# one version per dependency, declared here');
+      // consuming manifests are untouched
+      expect(writtenFile('packages/one/package.json')).toBeUndefined();
+      expect(writtenFile('packages/two/package.json')).toBeUndefined();
+    });
+
+    it('bumps named catalog entries', async () => {
+      mockCatalogTarget({
+        'package.json': makePkg('target-root', '1.0.0'),
+        'packages/one/package.json': makePkg('one', '1.0.0', { 'graphile-bar': 'catalog:legacy' })
+      });
+
+      const result = await runUpdateDeps(['--from', '/source', '--in', '/target']);
+
+      const barMatch = result.matchedPackages.find(p => p.name === 'graphile-bar');
+      expect(barMatch).toMatchObject({ currentVersion: '^1.0.0', catalog: 'legacy', outdated: true });
+
+      const yaml = writtenFile('pnpm-workspace.yaml') as string;
+      expect(yaml).toContain('  legacy:\n    graphile-bar: ^2.0.0\n');
+    });
+
+    it('bumps a manifest-level override in place, leaving the catalog entry alone', async () => {
+      mockCatalogTarget({
+        'package.json': makePkg('target-root', '1.0.0'),
+        'packages/one/package.json': makePkg('one', '1.0.0', { '@scope/foo': '^2.5.0' })
+      });
+
+      const result = await runUpdateDeps(['--from', '/source', '--in', '/target']);
+
+      const fooMatch = result.matchedPackages.find(p => p.name === '@scope/foo');
+      expect(fooMatch).toMatchObject({ consumer: 'one', currentVersion: '^2.5.0', outdated: true });
+      expect(fooMatch?.catalog).toBeUndefined();
+
+      expect(result.updatedFiles).toEqual(['packages/one/package.json']);
+      expect(JSON.parse(writtenFile('packages/one/package.json') as string).dependencies['@scope/foo']).toBe('^3.0.0');
+      expect(writtenFile('pnpm-workspace.yaml')).toBeUndefined();
+    });
+
+    it('still skips workspace: specs on cataloged deps', async () => {
+      mockCatalogTarget({
+        'package.json': makePkg('target-root', '1.0.0'),
+        'packages/one/package.json': makePkg('one', '1.0.0', { '@scope/foo': 'workspace:^' })
+      });
+
+      const result = await runUpdateDeps(['--from', '/source', '--in', '/target']);
+
+      expect(result.matchedPackages).toHaveLength(1);
+      expect(result.matchedPackages[0]).toMatchObject({ currentVersion: 'workspace:^', outdated: false });
+      expect(result.has_dep_changes).toBe(false);
+      expect(mockedFs.writeFile).not.toHaveBeenCalled();
+    });
+
+    it('does not write pnpm-workspace.yaml with --dry-run', async () => {
+      mockCatalogTarget({
+        'package.json': makePkg('target-root', '1.0.0'),
+        'packages/one/package.json': makePkg('one', '1.0.0', { '@scope/foo': 'catalog:' })
+      });
+
+      const result = await runUpdateDeps(['--from', '/source', '--in', '/target', '--dry-run']);
+
+      expect(result.has_dep_changes).toBe(true);
+      expect(result.updatedFiles).toHaveLength(0);
+      expect(mockedFs.writeFile).not.toHaveBeenCalled();
+    });
+
+    it('warns instead of silently skipping when a catalog entry is missing', async () => {
+      mockCatalogTarget({
+        'package.json': makePkg('target-root', '1.0.0'),
+        'packages/one/package.json': makePkg('one', '1.0.0', { 'graphile-bar': 'catalog:' })
+      });
+
+      const result = await runUpdateDeps(['--from', '/source', '--in', '/target']);
+
+      expect(result.matchedPackages).toHaveLength(0);
+      expect(result.warnings).toHaveLength(1);
+      expect(result.warnings[0]).toContain('graphile-bar');
+      expect(result.warnings[0]).toContain('catalog');
+      expect(mockedFs.writeFile).not.toHaveBeenCalled();
+    });
+  });
+
   it('should pick the highest version when source workspace contains duplicate package names', async () => {
     mockedFs.readFile.mockImplementation(async (filePath: any) => {
       const p = filePath.toString();

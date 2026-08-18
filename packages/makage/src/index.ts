@@ -9,3 +9,5 @@ export { runUpdateDeps, updateDeps } from './commands/updateDeps';
 export { runDeps } from './commands/deps';
 export { runCheckPublish, findWorkspaceLeaks } from './commands/checkPublish';
 export { findWorkspaceRoot, findRootFile } from './commands/workspace';
+export { packagePatternToGlob, findWorkspacePackageFiles } from './commands/workspacePatterns';
+export { parseCatalogSpec, readCatalogs, getCatalogSpec, setCatalogSpec } from './commands/catalogs';

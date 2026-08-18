@@ -1,8 +1,12 @@
 import fs from 'node:fs/promises';
 import path from 'node:path';
 
-import { glob } from 'glob';
 import { parse as parseYaml } from 'yaml';
+
+import { Catalogs, DEFAULT_CATALOG, getCatalogSpec, parseCatalogSpec, readCatalogs, setCatalogSpec } from './catalogs';
+import { findWorkspacePackageFiles } from './workspacePatterns';
+
+const WORKSPACE_FILE = 'pnpm-workspace.yaml';
 
 const DEPENDENCY_TYPES = [
   'dependencies',
@@ -13,6 +17,19 @@ const DEPENDENCY_TYPES = [
 
 interface PnpmWorkspace {
   packages?: string[];
+}
+
+interface TargetWorkspace {
+  file: string;
+  content: string;
+  patterns: string[];
+  catalogs: Catalogs;
+}
+
+interface CatalogBump {
+  catalog: string;
+  depName: string;
+  newSpec: string;
 }
 
 interface WorkspacePackage {
@@ -29,6 +46,8 @@ interface MatchedDep {
   consumer: string;
   file: string;
   outdated: boolean;
+  /** set when the spec came from a pnpm catalog rather than the manifest */
+  catalog?: string;
 }
 
 export interface UpdateDepsOptions {
@@ -43,6 +62,7 @@ export interface UpdateDepsResult {
   matchedPackages: MatchedDep[];
   outdatedPackages: MatchedDep[];
   updatedFiles: string[];
+  warnings: string[];
   dry_run: boolean;
   has_dep_changes: boolean;
 }
@@ -73,7 +93,7 @@ function parseArgs(args: string[]): { from: string; in: string; dryRun: boolean 
 }
 
 async function getWorkspacePackages(workspaceRoot: string): Promise<WorkspacePackage[]> {
-  const workspaceFile = path.join(workspaceRoot, 'pnpm-workspace.yaml');
+  const workspaceFile = path.join(workspaceRoot, WORKSPACE_FILE);
 
   let workspaceConfig: PnpmWorkspace;
   try {
@@ -88,16 +108,7 @@ async function getWorkspacePackages(workspaceRoot: string): Promise<WorkspacePac
     throw new Error('No package patterns found in pnpm-workspace.yaml');
   }
 
-  const packageJsonPatterns = patterns.map(p => {
-    const normalized = p.replace(/\/?\*\*?$/, '');
-    return `${normalized}/*/package.json`;
-  });
-
-  const packageFiles = await glob(packageJsonPatterns, {
-    cwd: workspaceRoot,
-    absolute: false,
-    ignore: ['**/node_modules/**']
-  });
+  const packageFiles = await findWorkspacePackageFiles(workspaceRoot, patterns);
 
   const packages: WorkspacePackage[] = [];
   for (const file of packageFiles) {
@@ -154,36 +165,34 @@ function applyVersionPrefix(currentSpec: string, newVersion: string): string {
   return `${prefix}${newVersion}`;
 }
 
-async function getTargetPackageFiles(targetRoot: string): Promise<string[]> {
-  // Check if target has pnpm-workspace.yaml (monorepo)
-  const workspaceFile = path.join(targetRoot, 'pnpm-workspace.yaml');
+async function readTargetWorkspace(targetRoot: string): Promise<TargetWorkspace | null> {
+  const file = path.join(targetRoot, WORKSPACE_FILE);
+  let content: string;
   try {
-    const content = await fs.readFile(workspaceFile, 'utf-8');
-    const config = parseYaml(content) as PnpmWorkspace;
-    const patterns = config.packages;
-    if (patterns && patterns.length > 0) {
-      const packageJsonPatterns = patterns.map(p => {
-        const normalized = p.replace(/\/?\*\*?$/, '');
-        return `${normalized}/*/package.json`;
-      });
-      // Also include the root package.json
-      const files = await glob(packageJsonPatterns, {
-        cwd: targetRoot,
-        absolute: false,
-        ignore: ['**/node_modules/**']
-      });
-      return ['package.json', ...files];
-    }
+    content = await fs.readFile(file, 'utf-8');
   } catch {
-    // Not a monorepo — fall through
+    return null;
+  }
+
+  let patterns: string[] = [];
+  try {
+    patterns = (parseYaml(content) as PnpmWorkspace)?.packages ?? [];
+  } catch {
+    patterns = [];
+  }
+
+  return { file, content, patterns, catalogs: readCatalogs(content) };
+}
+
+async function getTargetPackageFiles(targetRoot: string, workspace: TargetWorkspace | null): Promise<string[]> {
+  if (workspace && workspace.patterns.length > 0) {
+    const files = await findWorkspacePackageFiles(targetRoot, workspace.patterns);
+    // Also include the root package.json
+    return ['package.json', ...files];
   }
 
   // No workspace — scan for all package.json files recursively
-  const allFiles = await glob('**/package.json', {
-    cwd: targetRoot,
-    absolute: false,
-    ignore: ['**/node_modules/**']
-  });
+  const allFiles = await findWorkspacePackageFiles(targetRoot, ['**']);
 
   // Always include root package.json first if it exists
   if (allFiles.includes('package.json')) {
@@ -227,9 +236,16 @@ export async function updateDeps(opts: UpdateDepsOptions): Promise<UpdateDepsRes
   log(`[makage] Found ${sourcePackages.length} packages in source workspace`);
 
   // Step 2: Scan target repo's package.json files
-  const targetFiles = await getTargetPackageFiles(targetRoot);
+  const workspace = await readTargetWorkspace(targetRoot);
+  const targetFiles = await getTargetPackageFiles(targetRoot, workspace);
   const matchedPackages: MatchedDep[] = [];
   const updatedFiles: string[] = [];
+  const warnings: string[] = [];
+
+  // A cataloged dependency is declared once in pnpm-workspace.yaml and consumed
+  // by many manifests: report and bump it once, keyed by catalog + dep name.
+  const catalogMatches = new Map<string, MatchedDep>();
+  const catalogBumps: CatalogBump[] = [];
 
   for (const file of targetFiles) {
     const pkgPath = path.join(targetRoot, file);
@@ -250,6 +266,50 @@ export async function updateDeps(opts: UpdateDepsOptions): Promise<UpdateDepsRes
         if (!source) continue;
 
         const currentVersion = depVersion as string;
+
+        // `catalog:` / `catalog:<name>` — the version lives in pnpm-workspace.yaml,
+        // so resolve it there and bump the catalog entry instead of the manifest.
+        // A manifest that pins an explicit range instead of using the catalog is
+        // handled by the normal path below: the override is deliberate, but it is
+        // still a version we own, so it gets bumped in place.
+        const catalogName = parseCatalogSpec(currentVersion);
+        if (catalogName) {
+          const key = `${catalogName}\u0000${depName}`;
+          if (catalogMatches.has(key)) continue;
+
+          const catalogSpec = workspace ? getCatalogSpec(workspace.catalogs, catalogName, depName) : undefined;
+          if (catalogSpec === undefined) {
+            const label = catalogName === DEFAULT_CATALOG ? 'catalog' : `catalogs.${catalogName}`;
+            const warning = `${consumer} (${depType}) requests "${depName}": "${currentVersion}" but ${label} has no entry for it in ${WORKSPACE_FILE} — cannot check for updates`;
+            warnings.push(warning);
+            log(`[makage] WARNING ${warning}`);
+            continue;
+          }
+
+          const catalogOutdated = isOutdated(catalogSpec, source.version);
+          const catalogMatch: MatchedDep = {
+            name: depName,
+            currentVersion: catalogSpec,
+            availableVersion: source.version,
+            depType,
+            consumer: currentVersion,
+            file: WORKSPACE_FILE,
+            outdated: catalogOutdated,
+            catalog: catalogName
+          };
+          catalogMatches.set(key, catalogMatch);
+          matchedPackages.push(catalogMatch);
+
+          if (catalogOutdated) {
+            catalogBumps.push({
+              catalog: catalogName,
+              depName,
+              newSpec: applyVersionPrefix(catalogSpec, source.version)
+            });
+          }
+          continue;
+        }
+
         const outdated = isOutdated(currentVersion, source.version);
         matchedPackages.push({
           name: depName,
@@ -277,6 +337,29 @@ export async function updateDeps(opts: UpdateDepsOptions): Promise<UpdateDepsRes
     }
   }
 
+  if (workspace && catalogBumps.length > 0 && !opts.dryRun) {
+    let content = workspace.content;
+    let changed = false;
+
+    for (const bump of catalogBumps) {
+      const next = setCatalogSpec(content, bump.catalog, bump.depName, bump.newSpec);
+      if (next === null) {
+        const warning = `Could not rewrite ${bump.depName} in ${WORKSPACE_FILE} (catalog "${bump.catalog}")`;
+        warnings.push(warning);
+        log(`[makage] WARNING ${warning}`);
+        continue;
+      }
+      content = next;
+      changed = true;
+    }
+
+    if (changed) {
+      await fs.writeFile(workspace.file, content);
+      updatedFiles.push(WORKSPACE_FILE);
+      log(`[makage] Updated ${WORKSPACE_FILE}`);
+    }
+  }
+
   const outdatedPackages = matchedPackages.filter(p => p.outdated);
 
   const result: UpdateDepsResult = {
@@ -284,6 +367,7 @@ export async function updateDeps(opts: UpdateDepsOptions): Promise<UpdateDepsRes
     matchedPackages,
     outdatedPackages,
     updatedFiles,
+    warnings,
     dry_run: Boolean(opts.dryRun),
     has_dep_changes: outdatedPackages.length > 0
   };

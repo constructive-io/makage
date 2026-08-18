@@ -269,19 +269,33 @@ makage update-deps --from ./constructive --in . --dry-run
 
 **How it works:**
 1. Reads `pnpm-workspace.yaml` from the source to discover all published packages and their versions
-2. Scans all `package.json` files in the target repo (workspace-aware or recursive scan)
+2. Scans all `package.json` files in the target repo (workspace-aware or recursive scan). Workspace patterns are expanded the way pnpm expands them, so interior `*` segments work (`functions/*/handlers/*`, `functions/*/pages`), as do `!` exclusions
 3. Cross-references `dependencies`, `devDependencies`, `peerDependencies`, and `optionalDependencies`
 4. Compares version strings (strips `^`/`~` prefixes) to determine what's outdated
 5. Rewrites outdated version specs in place, preserving `^`/`~` prefixes and file formatting; `workspace:` deps are left untouched (skipped with `--dry-run`)
-6. Outputs a JSON result with `sourcePackages`, `matchedPackages`, `outdatedPackages`, `updatedFiles`, `dry_run`, and `has_dep_changes`
+6. Resolves `catalog:` / `catalog:<name>` specs against the catalogs in the target's `pnpm-workspace.yaml` and bumps the **catalog entry** instead of the manifest — see below
+7. Outputs a JSON result with `sourcePackages`, `matchedPackages`, `outdatedPackages`, `updatedFiles`, `warnings`, `dry_run`, and `has_dep_changes`
+
+**pnpm catalogs:**
+
+A dependency declared as `"typescript": "catalog:"` gets its version from `catalog:` (or `catalogs.<name>:` for `catalog:<name>`) in the target's `pnpm-workspace.yaml`. `update-deps`:
+
+- bumps the catalog entry in `pnpm-workspace.yaml`, rewriting just that one line so surrounding comments and formatting survive
+- reports a cataloged dependency **once** (with `catalog` set and `file: pnpm-workspace.yaml`), not once per consuming manifest
+- bumps a manifest that overrides a cataloged dep with an explicit range **in place**, like any other semver spec — the override stays an override
+- adds a `warnings` entry when a manifest requests `catalog:` for a dep that has no catalog entry, rather than skipping it silently
 
 **Output format:**
 ```json
 {
   "sourcePackages": [{ "name": "@constructive/foo", "version": "1.2.3", "path": "packages/foo" }],
-  "matchedPackages": [{ "name": "@constructive/foo", "currentVersion": "^1.1.0", "availableVersion": "1.2.3", "depType": "dependencies", "consumer": "@myapp/bar", "outdated": true }],
+  "matchedPackages": [
+    { "name": "@constructive/foo", "currentVersion": "^1.1.0", "availableVersion": "1.2.3", "depType": "dependencies", "consumer": "@myapp/bar", "file": "application/bar/package.json", "outdated": true },
+    { "name": "@constructive/baz", "currentVersion": "^2.0.0", "availableVersion": "2.1.0", "depType": "dependencies", "consumer": "catalog:", "file": "pnpm-workspace.yaml", "catalog": "default", "outdated": true }
+  ],
   "outdatedPackages": [/* subset where outdated=true */],
-  "updatedFiles": ["application/bar/package.json"],
+  "updatedFiles": ["application/bar/package.json", "pnpm-workspace.yaml"],
+  "warnings": [],
   "dry_run": false,
   "has_dep_changes": true
 }

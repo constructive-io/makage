@@ -55,12 +55,13 @@ makage update-deps --from <path-to-source-workspace> --in <path-to-target-repo> 
 ### Algorithm
 
 1. Reads `pnpm-workspace.yaml` from `--from` to discover all packages + versions
-2. Scans all `package.json` files in `--in` (supports workspace and non-workspace repos)
+2. Scans all `package.json` files in `--in` (supports workspace and non-workspace repos). Workspace patterns expand with pnpm's semantics — interior `*` segments (`functions/*/handlers/*`, `functions/*/pages`) and `!` exclusions included
 3. Cross-references dependencies/devDependencies/peerDependencies/optionalDependencies
 4. Strips `^`/`~`/`>=` prefixes and compares semver parts numerically
 5. Skips `workspace:` protocol deps (always in sync)
-6. Rewrites outdated specs in the target `package.json` files in place, preserving `^`/`~` prefixes and formatting (skipped with `--dry-run`/`--check`)
-7. Outputs structured JSON to stdout; logs to stderr
+6. Resolves `catalog:` / `catalog:<name>` specs against `catalog`/`catalogs` in the target's `pnpm-workspace.yaml`, and bumps the catalog entry there (one line rewritten, comments preserved) instead of the manifest. A cataloged dep is reported once, not once per consumer; a manifest that overrides a cataloged dep with an explicit range is bumped in place
+7. Rewrites outdated specs in the target `package.json` files in place, preserving `^`/`~` prefixes and formatting (skipped with `--dry-run`/`--check`)
+8. Outputs structured JSON to stdout; logs to stderr. `warnings` carries anything that could not be checked (e.g. `catalog:` for a dep with no catalog entry) so a catalog typo cannot masquerade as success
 
 ### JSON Output Schema
 
@@ -72,11 +73,14 @@ makage update-deps --from <path-to-source-workspace> --in <path-to-target-repo> 
     "currentVersion": "string",
     "availableVersion": "string",
     "depType": "dependencies | devDependencies | peerDependencies | optionalDependencies",
-    "consumer": "string",
+    "consumer": "string — package name, or the catalog spec for cataloged deps",
+    "file": "string — manifest that declares it, or pnpm-workspace.yaml for cataloged deps",
+    "catalog": "string | undefined — catalog name when the version came from a catalog",
     "outdated": "boolean"
   }],
   "outdatedPackages": [/* subset of matchedPackages where outdated=true */],
-  "updatedFiles": ["string — package.json paths rewritten (empty in dry-run)"],
+  "updatedFiles": ["string — package.json / pnpm-workspace.yaml paths rewritten (empty in dry-run)"],
+  "warnings": ["string — things that could not be checked, e.g. a missing catalog entry"],
   "dry_run": "boolean",
   "has_dep_changes": "boolean"
 }
@@ -132,6 +136,8 @@ makage assumes the following structure:
 | `packages/makage/src/cli.ts` | CLI entrypoint and command dispatch |
 | `packages/makage/src/commands/updateDeps.ts` | Cross-repo dependency detection logic (`updateDeps` core + `--from/--in` CLI) |
 | `packages/makage/src/commands/deps.ts` | Sibling-repo resolution front end over `updateDeps` |
+| `packages/makage/src/commands/catalogs.ts` | pnpm catalog resolution + surgical `pnpm-workspace.yaml` edits |
+| `packages/makage/src/commands/workspacePatterns.ts` | pnpm-compatible `packages:` pattern expansion |
 | `packages/makage/src/commands/updateWorkspace.ts` | Workspace protocol updater |
 | `packages/makage/src/commands/build.ts` | Build orchestration |
 | `packages/makage/src/commands/copy.ts` | File copy with glob + flatten |
