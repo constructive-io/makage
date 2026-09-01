@@ -1,5 +1,26 @@
 import fs from 'node:fs/promises';
-import { findWorkspaceLeaks } from '../src/commands/checkPublish';
+import { findWorkspaceLeaks, resolveWorkspaceSpec } from '../src/commands/checkPublish';
+
+describe('resolveWorkspaceSpec', () => {
+  it('resolves star and bare specs to the workspace version', () => {
+    expect(resolveWorkspaceSpec('workspace:*', '1.2.3')).toBe('1.2.3');
+    expect(resolveWorkspaceSpec('workspace:', '1.2.3')).toBe('1.2.3');
+  });
+
+  it('keeps the range operator for caret and tilde specs', () => {
+    expect(resolveWorkspaceSpec('workspace:^', '1.2.3')).toBe('^1.2.3');
+    expect(resolveWorkspaceSpec('workspace:~', '1.2.3')).toBe('~1.2.3');
+  });
+
+  it('publishes explicit ranges verbatim', () => {
+    expect(resolveWorkspaceSpec('workspace:^1.2.3')).toBe('^1.2.3');
+  });
+
+  it('is unresolvable when no workspace package provides the version', () => {
+    expect(resolveWorkspaceSpec('workspace:*')).toBeUndefined();
+    expect(resolveWorkspaceSpec('workspace:^')).toBeUndefined();
+  });
+});
 
 describe('findWorkspaceLeaks', () => {
   it('should return empty array for clean package.json', () => {
