@@ -3,6 +3,12 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+# [0.8.0](https://github.com/constructive-io/makage/compare/makage@0.7.0...makage@0.8.0) (2026-09-01)
+
+### Bug Fixes
+
+- **check-publish:** only fail on workspace: specs the publish step cannot resolve ([c423c42](https://github.com/constructive-io/makage/commit/c423c4210fc0cefcb08691616e3be8f040446d82))
+
 # [0.7.0](https://github.com/constructive-io/makage/compare/makage@0.6.0...makage@0.7.0) (2026-08-18)
 
 ### Features
