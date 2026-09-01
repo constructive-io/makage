@@ -72,7 +72,9 @@ Usage:
   makage update-deps --from <source-workspace> --in <target-repo> [--dry-run]
   makage deps <sibling-repo...> [--all] [--list] [--dry-run] [--install] [--json]
                                   (update this workspace from sibling repos, e.g. ../constructive)
-  makage check-publish [path]       (check dist/package.json for workspace: leaks)
+  makage check-publish [path] [--strict]
+                                  (check dist/package.json for workspace: specs the
+                                   publish step cannot resolve; --strict rejects all)
 `);
 }
 
