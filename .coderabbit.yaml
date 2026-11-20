@@ -1,0 +1,19 @@
+# yaml-language-server: $schema=https://coderabbit.ai/integrations/schema.v2.json
+language: en-US
+reviews:
+  profile: chill
+  high_level_summary: true
+  review_status: true
+  poem: false
+  auto_review:
+    enabled: true
+    drafts: false
+  path_filters:
+    - "!pnpm-lock.yaml"
+    - "!**/dist/**"
+  path_instructions:
+    - path: "packages/makage/src/**/*.ts"
+      instructions: >-
+        Preserve the README's zero-dependency, Node-built-in-only design and cross-platform behavior. Review filesystem copying, cleaning and glob handling for safe paths and consistent CJS/ESM build output.
+chat:
+  art: false
